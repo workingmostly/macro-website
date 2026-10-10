@@ -7,8 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check",
-    "insta": "node insta/render.mjs"
+    "check": "astro check"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.1",
@@ -23,8 +22,6 @@
   "devDependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "puppeteer-core": "^25.13.0",
-    "sharp": "^0.35.5",
     "typescript": "^7.0.2"
   }
 }

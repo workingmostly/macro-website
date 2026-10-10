@@ -28,18 +28,6 @@ The iPhone screens in `src/components/screens/` are HTML recreations of the app,
 
 `HeroDemo.tsx` runs the real input flow (calories → protein → emoji → Today). It plays itself while nobody's touching it, and hands over control on the first drag, tap or key press.
 
-## Instagram carousel
-
-`insta/` holds a 5-slide 4:5 carousel (1080 × 1350) built from the same components and styles as the site, as both `macro-<n>.png` (ready to post) and `macro-<n>.svg` (drag into Figma for editable layers: real text in Inter / Inter Tight, shapes with corner radii, gradients and drop shadows).
-
-To edit a slide in code, change `insta/Slide.astro` and preview it at `localhost:4321/insta/1` to `/insta/5` while `npm run dev` is running; those pages are dev-only and never deployed. Then, with the dev server still running:
-
-```bash
-npm run insta
-```
-
-That re-renders the PNGs and SVGs using your installed Chrome or Edge. The SVG conversion lives in `insta/svg-export.js`.
-
 ## Deploying
 
 `npm run build` produces a plain static site in `dist/`, so it can go on Vercel, Netlify, Cloudflare Pages or GitHub Pages with no adapter. Once there's a domain, set `site` in `astro.config.mjs` so Open Graph tags get absolute URLs.
