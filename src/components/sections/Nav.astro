@@ -1,0 +1,46 @@
+---
+import { site } from '../../config';
+
+const links = [
+  { href: '/#how-it-works', label: 'How it works' },
+  { href: '/#features', label: 'Features' },
+  { href: '/#faq', label: 'FAQ' },
+];
+---
+
+<!-- Sits inset inside the hero card on landing, then tucks up to the top once scrolling starts. -->
+<header
+  data-nav
+  class="fixed inset-x-0 top-3 z-50 translate-y-3 px-3 transition-transform duration-300 ease-out data-scrolled:translate-y-0 sm:top-4 sm:translate-y-4 sm:px-4 sm:data-scrolled:translate-y-0"
+>
+  <nav
+    class="mx-auto flex h-16 max-w-6xl items-center justify-between rounded-l-[24px] rounded-r-[32px] bg-white/80 pr-2 pl-3.5 shadow-[0_8px_30px_rgb(0_0_0/0.07)] ring-1 ring-black/[0.06] backdrop-blur-xl backdrop-saturate-150"
+    aria-label="Main"
+  >
+    <a href="/" class="flex items-center gap-2.5 rounded-full pr-2" aria-label="Macro home">
+      <img src="/icon.png" alt="" width="36" height="36" class="size-9 rounded-[10px]" />
+      <span class="font-display text-[22px] font-semibold tracking-[-0.035em]">Macro</span>
+    </a>
+
+    <div class="hidden items-center gap-9 text-[15px] text-ink/70 md:flex">
+      {
+        links.map((link) => (
+          <a href={link.href} class="transition-colors hover:text-ink">
+            {link.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <a href={site.betaUrl} target="_blank" rel="noopener" class="btn btn-primary h-12 px-6 text-[15px]">{site.ctaLabel}</a>
+  </nav>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-nav]');
+  if (header) {
+    const update = () => header.toggleAttribute('data-scrolled', window.scrollY > 16);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+</script>

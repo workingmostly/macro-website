@@ -1,0 +1,38 @@
+---
+import { InputScreen, Phone, TodayScreen, SAMPLE_DAY } from '../screens/ios';
+import { site } from '../../config';
+---
+
+<section class="px-3 pt-28 sm:px-4 sm:pt-40">
+  <div class="reveal relative overflow-hidden rounded-card bg-night px-6 pt-20 text-center text-white sm:pt-28">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 bottom-0 h-[70%] bg-[radial-gradient(50%_60%_at_50%_100%,rgb(52_199_89/0.28),transparent)]"
+    >
+    </div>
+
+    <div class="relative mx-auto max-w-3xl">
+      <img src="/icon.png" alt="" width="80" height="80" class="mx-auto size-20 rounded-[20px] ring-1 ring-white/15" />
+      <h2 class="display mt-8 text-[clamp(2.75rem,7vw,5.5rem)]">Your next meal takes seconds to log.</h2>
+      <p class="mx-auto mt-6 max-w-lg text-lg text-white/60 sm:text-xl">
+        Join the beta on TestFlight and start tracking today.
+      </p>
+      <div class="mt-10 flex flex-col items-center gap-4">
+        <a href={site.betaUrl} target="_blank" rel="noopener" class="btn btn-light h-14 px-9 text-[17px]">{site.ctaLabel}</a>
+        <span class="text-sm text-white/45">{site.availability}</span>
+      </div>
+    </div>
+
+    <div class="relative mx-auto mt-20 flex h-[300px] max-w-4xl items-start justify-center sm:h-[400px]">
+      <Phone className="absolute top-14 hidden -translate-x-[78%] -rotate-[8deg] brightness-[0.8] [--s:0.6] sm:block">
+        <InputScreen field="protein" value={42} stepIndex={1} label="Dinner" time="19:12" />
+      </Phone>
+      <Phone className="absolute top-14 hidden translate-x-[78%] rotate-[8deg] brightness-[0.8] [--s:0.6] sm:block">
+        <TodayScreen meals={SAMPLE_DAY} />
+      </Phone>
+      <Phone className="relative [--s:0.62] sm:[--s:0.66]">
+        <InputScreen field="calories" value={640} stepIndex={0} label="Dinner" time="19:12" />
+      </Phone>
+    </div>
+  </div>
+</section>

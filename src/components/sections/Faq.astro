@@ -1,0 +1,68 @@
+---
+import { site } from '../../config';
+
+const faqs = [
+  {
+    q: 'How do I get Macro?',
+    a: `Macro is in public beta on TestFlight, Apple's app for testing new apps. Tap "${site.ctaLabel}" on your iPhone, install TestFlight if you don't have it, and you're in. It needs iOS 17 or later.`,
+  },
+  {
+    q: "I don't know how many calories are in my food. Is Macro for me?",
+    a: "If you've tracked before, you probably know more than you think, and Macro is built for exactly that. If you're starting out, packet labels and a quick search will calibrate you within a week or two. A ballpark figure logged every day is far more useful than a precise one you give up on.",
+  },
+  {
+    q: 'How are carbs and fat worked out?',
+    a: "Every gram of protein is 4 calories, so Macro sets protein's share aside and splits what's left between carbs (4 kcal/g) and fat (9 kcal/g). The default is 60% carbs, 40% fat, and you can adjust it in Settings. If you'd rather enter one yourself, switch to manual: you drag carbs or fat, and the other is calculated exactly.",
+  },
+  {
+    q: 'Why is there no barcode scanner or food database?',
+    a: "Because they're the slow part. Searching, scanning and weighing are what make most people stop tracking after a few weeks. Leaving them out is the whole idea.",
+  },
+  {
+    q: 'Do I have to track calories and protein?',
+    a: "It's up to you. Track calories on their own, add protein, carbs and fat, or add fibre as well. Food emojis are optional too. Every option you turn on is one extra drag per meal.",
+  },
+  {
+    q: 'Does it sync between devices?',
+    a: 'Yes. Macro syncs through your own private iCloud, so your log survives a new phone or a reinstall. You can turn sync off in Settings whenever you like.',
+  },
+  {
+    q: 'What data do you collect?',
+    a: "None. Macro has no server, no account, no analytics and no ads. Everything you log stays on your device and, if you sync, in your own iCloud, which we can't access.",
+  },
+  {
+    q: 'Is Macro on Android or iPad?',
+    a: 'Not right now. Macro is iPhone-only for the moment.',
+  },
+];
+---
+
+<section id="faq" class="px-3 pt-28 sm:px-4 sm:pt-40">
+  <div class="mx-auto grid max-w-6xl gap-12 px-3 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
+    <div class="reveal">
+      <p class="eyebrow text-faint">FAQ</p>
+      <h2 class="display mt-5 text-[clamp(2.6rem,5.6vw,4.5rem)]">Questions, answered.</h2>
+      <p class="mt-6 text-lg text-muted">
+        Something else? <a href={`mailto:${site.contactEmail}`} class="text-ink underline decoration-ink/20 underline-offset-4 hover:decoration-ink">Get in touch</a>.
+      </p>
+    </div>
+
+    <div class="reveal divide-y divide-line border-y border-line">
+      {
+        faqs.map((item) => (
+          <details class="faq group">
+            <summary class="flex items-center justify-between gap-6 py-6 text-lg font-medium sm:text-xl">
+              {item.q}
+              <span class="faq-icon grid size-9 shrink-0 place-items-center rounded-full bg-surface transition-transform duration-300">
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+              </span>
+            </summary>
+            <p class="max-w-2xl pr-12 pb-7 text-[17px] leading-relaxed text-muted">{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,36 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/inter-tight';
+import '../../styles/global.css';
+import Slide from '../../../insta/Slide.astro';
+
+// Dev-only: these pages exist to be screenshotted into insta/*.png by
+// `npm run insta`, so they're left out of the production build.
+export function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  return [1, 2, 3, 4, 5].map((n) => ({ params: { slide: String(n) } }));
+}
+
+const n = Number(Astro.params.slide);
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Instagram slide {n} - Macro</title>
+    <style is:global>
+      body {
+        margin: 0;
+        width: 1080px;
+      }
+      astro-dev-toolbar {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <Slide n={n} />
+  </body>
+</html>

@@ -1,0 +1,643 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter Tight Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #0a0a0a;
+  --color-muted: #6e6e73;
+  --color-faint: #a1a1a6;
+  --color-line: #e5e5ea;
+  --color-surface: #f2f2f7;
+  --color-night: #0b0b0c;
+
+  /* iOS system colours, as used in the app */
+  --color-ios-blue: #007aff;
+  --color-ios-blue-dark: #0062cc;
+  --color-ios-green: #34c759;
+  --color-ios-yellow: #ffcc00;
+  --color-ios-orange: #ff9500;
+  --color-ios-red: #ff3b30;
+  --color-ios-purple: #af52de;
+
+  /* The input screen's 14% accent fill, flattened onto white */
+  --color-green-tint: #e3f7e8;
+  --color-blue-tint: #dbecff;
+  --color-orange-tint: #ffefd9;
+
+  --radius-card: 2.5rem;
+
+  --animate-marquee: marquee 50s linear infinite;
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: #fff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-blue-tint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+      background-color 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-ios-blue) 45%, transparent);
+    outline-offset: 3px;
+  }
+  .btn-primary {
+    background: var(--color-ios-blue);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-ios-blue-dark);
+  }
+  .btn-light {
+    background: #fff;
+    color: var(--color-ink);
+  }
+  .btn-light:hover {
+    background: #e8e8ed;
+  }
+
+  /* Struck-through words in the "no" marquee */
+  .strike {
+    position: relative;
+  }
+  .strike::after {
+    content: '';
+    position: absolute;
+    left: -0.1em;
+    right: -0.1em;
+    top: 52%;
+    height: 0.09em;
+    background: currentColor;
+    border-radius: 1px;
+  }
+
+  .faq summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq[open] .faq-icon {
+    transform: rotate(45deg);
+  }
+
+  /* Only hidden once JS has run, so content never goes missing without it. */
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 700ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .js .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer components {
+  /* ────────────────────────────────────────────────────────────
+     iPhone frame. Screens are laid out at real iOS point sizes
+     (393 × 852) and scaled down as a whole with --s, so every
+     measurement below can be lifted straight from the app.
+     ──────────────────────────────────────────────────────────── */
+
+  .phone {
+    --s: 0.7;
+    position: relative;
+    flex: none;
+    width: calc(417px * var(--s));
+    height: calc(876px * var(--s));
+  }
+
+  .phone-device {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 417px;
+    height: 876px;
+    padding: 12px;
+    border-radius: 68px;
+    background: #0c0c0d;
+    transform: scale(var(--s));
+    transform-origin: 0 0;
+    box-shadow:
+      0 0 0 2px #d6d6db,
+      0 0 0 3.5px #b4b4ba,
+      0 60px 90px -40px rgb(0 0 0 / 0.35),
+      0 30px 50px -30px rgb(0 0 0 / 0.25);
+  }
+
+  .phone-screen {
+    position: relative;
+    width: 393px;
+    height: 852px;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 56px;
+    background: #fff;
+    color: #000;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter Variable', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .phone-island {
+    position: absolute;
+    z-index: 40;
+    top: 11px;
+    left: 50%;
+    width: 124px;
+    height: 36px;
+    border-radius: 20px;
+    background: #000;
+    transform: translateX(-50%);
+  }
+
+  .phone-home {
+    position: absolute;
+    z-index: 40;
+    bottom: 8px;
+    left: 50%;
+    width: 138px;
+    height: 5px;
+    border-radius: 3px;
+    background: #000;
+    transform: translateX(-50%);
+  }
+
+  .ios-status {
+    position: absolute;
+    z-index: 35;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 150px;
+    padding: 19px 26px 0;
+    height: 54px;
+    pointer-events: none;
+  }
+  .ios-status > div {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .ios-status-time {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Input screen ─────────────────────────────────────────── */
+
+  .ios-input {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    touch-action: none;
+  }
+
+  .ios-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-top: 1px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, #fff);
+  }
+
+  .ios-segments {
+    position: absolute;
+    z-index: 5;
+    top: 54px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    gap: 4px;
+  }
+  .ios-segments span {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: rgb(0 0 0 / 0.28);
+    transition: background-color 200ms ease;
+  }
+  .ios-segments span[data-on='true'] {
+    background: #000;
+  }
+
+  .ios-entry {
+    position: absolute;
+    z-index: 5;
+    top: 66px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    color: #8a8a8e;
+  }
+  .ios-entry b {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #000;
+    font-weight: 600;
+  }
+
+  .ios-readout {
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .ios-caption {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+  .ios-number {
+    margin-top: 4px;
+    font-size: 128px;
+    font-weight: 200;
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+  .ios-unit {
+    margin-top: 6px;
+    font-size: 17px;
+    color: #8a8a8e;
+  }
+
+  .ios-cancel {
+    position: absolute;
+    z-index: 6;
+    bottom: 48px;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 26px;
+    border-radius: 22px;
+    border: 0.5px solid rgb(0 0 0 / 0.1);
+    background: rgb(242 242 247 / 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    font-size: 17px;
+    font-weight: 500;
+    color: #000;
+    transform: translateX(-50%);
+  }
+
+  .ios-emoji-big {
+    margin-top: 14px;
+    font-size: 76px;
+    line-height: 1;
+  }
+
+  .ios-palette {
+    position: absolute;
+    z-index: 6;
+    bottom: 114px;
+    left: 20px;
+    display: flex;
+    gap: 9px;
+    white-space: nowrap;
+  }
+  .ios-palette button {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    flex: none;
+    border-radius: 14px;
+    background: #f2f2f7;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+  .ios-palette button[aria-pressed='true'] {
+    background: #dcdce1;
+  }
+
+  /* ── Today screen ─────────────────────────────────────────── */
+
+  .ios-today {
+    position: absolute;
+    inset: 0;
+    background: #f2f2f7;
+  }
+
+  .ios-today-header {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ios-large-title {
+    flex: 1;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .ios-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 13px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .ios-glass-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: rgb(255 255 255 / 0.9);
+    box-shadow:
+      0 0 0 0.5px rgb(0 0 0 / 0.08),
+      0 2px 8px rgb(0 0 0 / 0.08);
+  }
+
+  .ios-card {
+    background: #fff;
+    border-radius: 24px;
+  }
+
+  .ios-today-body {
+    position: absolute;
+    top: 136px;
+    left: 16px;
+    right: 16px;
+  }
+
+  .ios-stats {
+    padding: 24px 12px 24px 24px;
+  }
+  .ios-stats-row {
+    display: flex;
+    align-items: stretch;
+  }
+  .ios-stat {
+    flex: 1;
+    min-width: 0;
+  }
+  .ios-stat-label {
+    font-size: 13px;
+    color: #8a8a8e;
+  }
+  .ios-stat-value {
+    margin-top: 2px;
+    font-size: 22px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .ios-stat-value small {
+    font-size: 15px;
+    font-weight: 400;
+    color: #8a8a8e;
+  }
+  .ios-bar {
+    height: 4px;
+    margin-top: 10px;
+    border-radius: 2px;
+    background: rgb(120 120 128 / 0.16);
+    overflow: hidden;
+  }
+  .ios-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    transition: width 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .ios-stats-divider {
+    width: 0.5px;
+    margin: 0 16px;
+    background: rgb(60 60 67 / 0.29);
+  }
+  .ios-chevron {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    color: #c4c4c6;
+  }
+
+  .ios-macro-row {
+    margin-top: 18px;
+  }
+  .ios-macro-row-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+  }
+  .ios-macro-row-head span:last-child {
+    margin-left: auto;
+    color: #8a8a8e;
+    font-variant-numeric: tabular-nums;
+  }
+  .ios-estimated {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 11px;
+    background: rgb(120 120 128 / 0.12);
+    color: #6e6e73;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .ios-meals {
+    margin-top: 32px;
+  }
+
+  /* Lets iOS pieces (stats card, adherence card) sit outside a phone frame. */
+  .ios-scope {
+    color: #000;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter Variable', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .ios-meal-head {
+    display: grid;
+    grid-template-columns: 1fr 72px 92px 28px;
+    align-items: end;
+    padding: 0 8px 8px 14px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #8a8a8e;
+  }
+  .ios-meal-head span:nth-child(2),
+  .ios-meal-head span:nth-child(3) {
+    text-align: center;
+  }
+  .ios-meal-row {
+    display: grid;
+    grid-template-columns: 1fr 72px 92px 28px;
+    align-items: center;
+    height: 57px;
+    margin-bottom: 20px;
+    padding: 0 8px 0 16px;
+    border-radius: 29px;
+    background: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  .ios-meal-row .emojis {
+    display: flex;
+    gap: 4px;
+    font-size: 23px;
+    line-height: 1;
+  }
+  .ios-meal-row .cals {
+    text-align: center;
+  }
+  .ios-meal-row .protein {
+    text-align: center;
+    color: #8a8a8e;
+  }
+  .ios-meal-row.is-new {
+    animation: ios-row-in 650ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes ios-row-in {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.96);
+    }
+  }
+
+  .ios-fab {
+    position: absolute;
+    z-index: 10;
+    right: 22px;
+    bottom: 56px;
+    display: grid;
+    place-items: center;
+    width: 66px;
+    height: 66px;
+    border-radius: 33px;
+    background: #0a84ff;
+    color: #fff;
+    box-shadow:
+      0 6px 16px rgb(10 132 255 / 0.35),
+      inset 0 1px 0 rgb(255 255 255 / 0.25);
+    cursor: pointer;
+  }
+
+  /* ── Demo-only overlays ───────────────────────────────────── */
+
+  .ghost-touch {
+    position: absolute;
+    z-index: 50;
+    width: 56px;
+    height: 56px;
+    margin: -28px 0 0 -28px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.14);
+    box-shadow:
+      0 0 0 1.5px rgb(255 255 255 / 0.9),
+      0 4px 14px rgb(0 0 0 / 0.18);
+    pointer-events: none;
+    transition:
+      opacity 220ms ease,
+      transform 160ms ease;
+  }
+  .ghost-touch[data-pressed='true'] {
+    transform: scale(0.82);
+    background: rgb(0 0 0 / 0.22);
+  }
+}

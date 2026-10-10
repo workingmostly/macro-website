@@ -1,0 +1,31 @@
+---
+const stats = [
+  { value: '2', body: 'numbers per meal. Calories and protein; everything else is estimated.' },
+  { value: '±10%', body: 'of your calorie goal still counts as a day on target.' },
+  { value: '0', body: 'accounts, ads or trackers. We never see a thing you log.' },
+];
+---
+
+<section class="px-3 pt-28 sm:px-4 sm:pt-40">
+  <div class="reveal rounded-card bg-surface px-6 py-20 text-center sm:px-12 sm:py-32">
+    <p class="eyebrow text-ios-orange">Why it works</p>
+    <h2 class="display mx-auto mt-6 max-w-5xl text-[clamp(2.6rem,6.6vw,5.75rem)]">
+      Roughly right every day beats perfectly right for a week.
+    </h2>
+    <p class="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
+      You don't need to know that dinner was 612 calories. Knowing it was about 600, and that you're landing near
+      your goal most days, is what actually moves the needle. Macro is built for being mindful, not meticulous.
+    </p>
+
+    <div class="mx-auto mt-16 grid max-w-5xl gap-3 sm:mt-20 sm:grid-cols-3 sm:gap-4">
+      {
+        stats.map((stat) => (
+          <div class="rounded-[2rem] bg-white px-7 py-9 text-left sm:px-8 sm:py-10">
+            <p class="display text-6xl sm:text-7xl">{stat.value}</p>
+            <p class="mt-4 text-[17px] leading-relaxed text-muted">{stat.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

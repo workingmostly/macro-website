@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/sections/Nav.astro';
+import Footer from '../components/sections/Footer.astro';
+import { site } from '../config';
+---
+
+<Base title="Privacy Policy - Macro" description="What happens to your data in Macro, in plain English.">
+  <Nav />
+  <main class="px-3 pt-3 sm:px-4 sm:pt-4">
+    <div class="rounded-card bg-surface px-6 pt-36 pb-16 text-center sm:pt-44 sm:pb-20">
+      <p class="eyebrow text-ios-blue">Privacy Policy</p>
+      <h1 class="display mx-auto mt-5 max-w-3xl text-[clamp(2.6rem,6vw,4.5rem)]">Your data stays yours.</h1>
+      <p class="mt-6 text-muted">Last updated: September 2026</p>
+    </div>
+
+    <article
+      class="mx-auto max-w-2xl px-3 pt-16 pb-8 text-[17px] leading-relaxed text-ink/75 [&_h2]:mt-12 [&_h2]:mb-3 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-[-0.03em] [&_h2]:text-ink [&_li]:mt-2 [&_p]:mt-4 [&_strong]:text-ink [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-6"
+    >
+      <p>
+        Macro is a simple calorie and protein tracker made by an independent developer ({site.studioName}). This
+        policy explains, plainly, what happens to your data.
+      </p>
+
+      <h2>The short version</h2>
+      <p>
+        Macro doesn't have a server, doesn't run analytics, doesn't show ads, and doesn't ask you to create an
+        account. Everything you log stays on your device and, if you turn on iCloud sync, in your own private iCloud
+        account — never on our servers, because we don't have any.
+      </p>
+
+      <h2>What Macro stores</h2>
+      <ul>
+        <li>
+          The meals you log: calories, protein, and (if you turn tracking on) carbs, fat, and fibre, along with the
+          label (Breakfast, Lunch, Dinner, Snack) and time you logged them.
+        </li>
+        <li>Your daily goals and app preferences (e.g. which macros you track, when your day starts).</li>
+        <li>
+          If you turn on meal reminders, the app schedules local notifications on your device from the times you've
+          logged meals. Those notifications never leave the device.
+        </li>
+      </ul>
+      <p>This is all the app is for — it isn't used for anything beyond showing it back to you.</p>
+
+      <h2>Where it's stored</h2>
+      <p>
+        By default, this data lives only in local storage on your device. If you turn on
+        <strong>"Sync with iCloud"</strong> in Settings, it's additionally stored in your own private iCloud database, using Apple's CloudKit — governed by
+        Apple's own privacy practices and your iCloud account. We (the developer) cannot see, access, or receive this
+        data at any point; it never passes through a server we operate, because Macro doesn't have one.
+      </p>
+      <p>
+        You can turn iCloud sync off at any time in Settings → iCloud &amp; Data, and you can permanently delete all
+        logged meals from within the app (Settings → iCloud &amp; Data → Delete all meals), which also removes them
+        from iCloud.
+      </p>
+
+      <h2>Third parties</h2>
+      <p>
+        Macro does not use any third-party analytics, advertising, or tracking SDKs. No data is sold, shared, or
+        transmitted to any third party. The only outside service involved is Apple's iCloud/CloudKit, which is
+        optional and under your control.
+      </p>
+
+      <h2>This website</h2>
+      <p>
+        This site doesn't use cookies, analytics or tracking scripts, and its fonts are served from the site itself
+        rather than a third party.
+      </p>
+
+      <h2>Children's privacy</h2>
+      <p>
+        Macro is not directed at children under 13 and does not knowingly collect any information from anyone, of
+        any age — it simply stores what you choose to log, on your own device and iCloud account.
+      </p>
+
+      <h2>Changes to this policy</h2>
+      <p>
+        If this policy ever changes, the update date at the top of this page will change too. Since the app doesn't
+        collect contact details, we can't notify you directly — check back here if you're curious.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy or the app can be sent to <a
+          href={`mailto:${site.contactEmail}`}
+          class="text-ios-blue hover:underline">{site.contactEmail}</a
+        >.
+      </p>
+    </article>
+  </main>
+  <Footer />
+</Base>

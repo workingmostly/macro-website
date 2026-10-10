@@ -1,0 +1,45 @@
+---
+import HeroDemo from '../HeroDemo';
+import { site } from '../../config';
+---
+
+<section class="px-3 pt-3 sm:px-4 sm:pt-4">
+  <div class="relative overflow-hidden rounded-card bg-surface">
+    <div
+      class="mx-auto grid max-w-6xl items-center gap-14 px-6 pt-32 pb-14 sm:px-10 lg:grid-cols-[1.2fr_1fr] lg:gap-4 lg:pt-36 lg:pb-16"
+    >
+      <div class="text-center lg:text-left">
+        <p
+          class="inline-flex items-center gap-2 rounded-full bg-white py-1.5 pr-4 pl-3 text-sm font-medium shadow-[0_1px_2px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.05]"
+        >
+          <span class="relative flex size-2">
+            <span class="absolute inline-flex size-full animate-ping rounded-full bg-ios-green opacity-60"></span>
+            <span class="relative inline-flex size-2 rounded-full bg-ios-green"></span>
+          </span>
+          Now in public beta
+        </p>
+
+        <h1 class="display mt-7 text-[clamp(2.9rem,6.6vw,5.25rem)]">
+          The calorie tracker you'll actually stick with.
+        </h1>
+
+        <p class="mx-auto mt-6 max-w-[34rem] text-lg leading-relaxed text-muted sm:text-xl lg:mx-0">
+          Macro is the fastest way to track calories and protein. No barcodes, no food search, no photos. Drag to
+          your numbers and get on with your day.
+        </p>
+
+        <div class="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+          <a href={site.betaUrl} target="_blank" rel="noopener" class="btn btn-primary h-14 px-8 text-[17px]">
+            {site.ctaLabel}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </a>
+          <span class="text-sm text-muted">{site.availability}</span>
+        </div>
+      </div>
+
+      <HeroDemo client:load />
+    </div>
+  </div>
+</section>

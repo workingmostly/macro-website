@@ -1,0 +1,19 @@
+---
+import { site } from '../../config';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-6 py-12 text-sm text-muted sm:flex-row">
+  <div class="flex items-center gap-3">
+    <img src="/icon.png" alt="" width="28" height="28" class="size-7 rounded-[7px]" />
+    <span>
+      © {year} Macro, a <a href={site.studioUrl} class="text-ink hover:underline">{site.studioName}</a> product.
+    </span>
+  </div>
+  <nav class="flex gap-7" aria-label="Footer">
+    <a href="/privacy-policy" class="hover:text-ink">Privacy</a>
+    <a href={`mailto:${site.contactEmail}`} class="hover:text-ink">Contact</a>
+    <a href={site.betaUrl} target="_blank" rel="noopener" class="hover:text-ink">TestFlight</a>
+  </nav>
+</footer>
