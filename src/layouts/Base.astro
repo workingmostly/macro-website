@@ -50,6 +50,25 @@ const ogImage = Astro.site ? new URL('/icon-512.png', Astro.site).href : undefin
         { rootMargin: '0px 0px -10% 0px', threshold: 0.08 },
       );
       els.forEach((el) => io.observe(el));
+
+      // Anything already on screen at load animates in straight away rather than waiting for the scroll
+      // threshold. Checked again once fonts and the page have loaded, since the hero shrinks a little when
+      // the web fonts swap in. Reading every rect first also flushes styles, so the transition still plays.
+      const revealOnScreen = () => {
+        const hidden = [...document.querySelectorAll<HTMLElement>('.reveal:not(.is-visible)')];
+        const onScreen = hidden.map((el) => {
+          const offset = new DOMMatrixReadOnly(getComputedStyle(el).transform).m42;
+          return el.getBoundingClientRect().top - offset < window.innerHeight;
+        });
+        hidden.forEach((el, i) => {
+          if (!onScreen[i]) return;
+          el.classList.add('is-visible');
+          io.unobserve(el);
+        });
+      };
+      revealOnScreen();
+      document.fonts.ready.then(revealOnScreen);
+      window.addEventListener('load', revealOnScreen, { once: true });
     </script>
   </body>
 </html>
