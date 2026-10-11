@@ -2,7 +2,7 @@
 
 Marketing site for **Macro**, the radically simple calorie and protein tracker for iPhone.
 
-Built with [Astro](https://astro.build) and Tailwind CSS v4. The site is static HTML. The only JavaScript is the interactive phone in the hero (a React island) and a small scroll-reveal script. Fonts (Inter and Inter Tight) are self-hosted, so nothing calls a third party.
+Built with [Astro](https://astro.build) and Tailwind CSS v4. The site is static HTML. The only JavaScript is two React islands (the interactive phone in the hero and the side-by-side comparison) and a small scroll-reveal script. Fonts (Inter and Inter Tight) are self-hosted, so nothing calls a third party.
 
 ## Running it
 
@@ -27,6 +27,8 @@ The iPhone screens in `src/components/screens/` are HTML recreations of the app,
 - `macroSplit()`: the 60/40 carbs/fat estimate from `MacroMath.swift`
 
 `HeroDemo.tsx` runs the real input flow (calories → protein → emoji → Today). It plays itself while nobody's touching it, and hands over control on the first drag, tap or key press.
+
+`CompareDemo.tsx` plays the same meal in a typical tracker and in Macro, one step per beat on both phones. The typical tracker's screens live in `screens/Typical.tsx`: deliberately generic and greyscale, standing for food-database trackers in general rather than any one app. The steps and captions are the `TYPICAL_STEPS` and `MACRO_STEPS` arrays. It pauses off screen, has a pause button, and with reduced motion (or no JavaScript) it shows both phones finished.
 
 ## Deploying
 
