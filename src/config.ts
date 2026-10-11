@@ -6,7 +6,7 @@ export const site = {
   // Public TestFlight invite. Swap for the App Store URL at launch.
   betaUrl: 'https://testflight.apple.com/join/Dq4g2CsP',
   ctaLabel: 'Join the beta',
-  availability: 'Free on TestFlight · iPhone · iOS 17+',
+  availability: 'Free forever · iOS 17+',
   contactEmail: 'hello@mostlywork.ing',
   studioName: 'mostlywork.ing',
   studioUrl: 'https://mostlywork.ing',
