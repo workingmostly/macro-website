@@ -303,7 +303,7 @@ export default function HeroDemo() {
       ? 'Drag up or down anywhere. Tap to confirm.'
       : step === 'emoji'
         ? 'Pick a food, or just tap to skip.'
-        : 'Logged. Tap + to add another.';
+        : 'Tap + to add a meal.';
 
   const stepIndex = step === 'calories' ? 0 : step === 'protein' ? 1 : 2;
   const announce =
@@ -368,8 +368,7 @@ export default function HeroDemo() {
           )}
         </div>
       </Phone>
-      <p className="relative mt-6 flex items-center gap-2 text-sm text-muted" aria-live="polite">
-        <span className="inline-block size-1.5 rounded-full" style={{ backgroundColor: glow }} />
+      <p className="relative mt-6 text-sm text-muted" aria-live="polite">
         {hint}
         <span className="sr-only">{announce}</span>
       </p>
