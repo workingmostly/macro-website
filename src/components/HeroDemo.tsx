@@ -71,7 +71,6 @@ export default function HeroDemo() {
   const [auto, setAuto] = useState(true);
   const [inView, setInView] = useState(false);
   const [ghost, setGhostState] = useState<Ghost>({ x: 250, y: 640, visible: false, pressed: false });
-  const [grabbed, setGrabbed] = useState(false);
   const [touchUI, setTouchUI] = useState(false);
 
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -135,7 +134,6 @@ export default function HeroDemo() {
     runRef.current++;
     setAuto(false);
     setGhost({ visible: false, pressed: false });
-    setGrabbed(false);
   }, [auto, setGhost]);
 
   useEffect(() => {
@@ -198,17 +196,6 @@ export default function HeroDemo() {
       setGhost({ pressed: false });
       await sleep(120);
     };
-    // Rests before dragging, the way a finger has to on a touch screen.
-    const grab = async () => {
-      setGhost({ pressed: true });
-      await sleep(HOLD_MS);
-      setGrabbed(true);
-      await sleep(120);
-    };
-    const letGo = () => {
-      setGhost({ pressed: false });
-      setGrabbed(false);
-    };
 
     const play = async () => {
       for (;;) {
@@ -219,19 +206,19 @@ export default function HeroDemo() {
         setMeals(SEED);
         setNewId(null);
         setGhost({ x: 255, y: 660, visible: false, pressed: false });
-        setGrabbed(false);
         await sleep(1000);
 
         // Drag up to ~520 kcal
         setGhost({ visible: true });
         await sleep(300);
-        await grab();
+        setGhost({ pressed: true });
+        await sleep(HOLD_MS);
         await tween(1900, (t) => {
           setCalories(snapCalories(520 * t));
           setGhost({ y: 660 - 300 * t });
         });
         await sleep(220);
-        letGo();
+        setGhost({ pressed: false });
         await sleep(500);
         await tap();
         setStep('protein');
@@ -239,13 +226,14 @@ export default function HeroDemo() {
 
         // Drag up to 38 g
         await moveTo(255, 660);
-        await grab();
+        setGhost({ pressed: true });
+        await sleep(HOLD_MS);
         await tween(1500, (t) => {
           setProtein(Math.round(38 * t));
           setGhost({ y: 660 - 260 * t });
         });
         await sleep(220);
-        letGo();
+        setGhost({ pressed: false });
         await sleep(450);
         await tap();
         setStep('emoji');
@@ -282,7 +270,6 @@ export default function HeroDemo() {
   const endDrag = () => {
     clearTimeout(holdRef.current);
     dragRef.current = null;
-    setGrabbed(false);
   };
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -315,7 +302,6 @@ export default function HeroDemo() {
         if (!d || d.pointerId !== id) return;
         d.held = true;
         stopAuto();
-        setGrabbed(true);
       }, HOLD_MS);
     }
   };
@@ -335,10 +321,7 @@ export default function HeroDemo() {
     }
     const dy = (d.y0 - e.clientY) / d.scale;
     const dx = (e.clientX - d.x0) / d.scale;
-    if (!d.moved && Math.hypot(dx, dy) > TAP_SLOP) {
-      d.moved = true;
-      if (slider) setGrabbed(true);
-    }
+    if (!d.moved && Math.hypot(dx, dy) > TAP_SLOP) d.moved = true;
     if (!d.moved) return;
     if (step === 'calories') setCalories(snapCalories(SCALES.calories.value(d.pos0 + dy * GAIN)));
     else if (step === 'protein') setProtein(Math.max(0, Math.round(SCALES.protein.value(d.pos0 + dy * GAIN))));
@@ -456,7 +439,6 @@ export default function HeroDemo() {
               }}
             />
           )}
-          <div className="grab-ring" data-on={grabbed} style={{ color: glow }} aria-hidden="true" />
           {ghost.visible && (
             <div className="ghost-touch" data-pressed={ghost.pressed} style={{ left: ghost.x, top: ghost.y }} />
           )}
