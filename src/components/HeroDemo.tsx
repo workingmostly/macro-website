@@ -19,6 +19,15 @@ const GAIN = 1.6;
 const TAP_SLOP = 6;
 /** Left 32% of the screen goes back, like Instagram Stories. */
 const BACK_ZONE = 0.32;
+/**
+ * On touch the same vertical swipe has to scroll the page, so a finger only grabs the slider once it has
+ * rested this long. A swipe that sets off straight away is left to the browser.
+ */
+const HOLD_MS = 300;
+/** CSS pixels a resting finger can wander before it counts as a swipe. */
+const HOLD_SLOP = 10;
+/** A touch this soon after the page moved is catching a fling, not reaching for the demo. */
+const SCROLL_SETTLE_MS = 150;
 
 const SEED: MealGroup[] = [
   { id: 'b', label: 'Breakfast', time: '8 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
@@ -34,9 +43,13 @@ interface Ghost {
 
 interface Drag {
   pointerId: number;
+  touch: boolean;
+  /** Touch only: the finger has rested for HOLD_MS and owns the slider. */
+  held: boolean;
   x0: number;
   y0: number;
-  pos0: number;
+  /** Null until a held touch first moves; it anchors there, after autoplay has let go. */
+  pos0: number | null;
   scale: number;
   left: number;
   width: number;
@@ -58,12 +71,15 @@ export default function HeroDemo() {
   const [auto, setAuto] = useState(true);
   const [inView, setInView] = useState(false);
   const [ghost, setGhostState] = useState<Ghost>({ x: 250, y: 640, visible: false, pressed: false });
+  const [touchUI, setTouchUI] = useState(false);
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
   const runRef = useRef(0);
   const ghostRef = useRef(ghost);
   const dragRef = useRef<Drag | null>(null);
+  const holdRef = useRef(0);
+  const scrolledAtRef = useRef(-Infinity);
 
   const setGhost = useCallback((next: Partial<Ghost>) => {
     ghostRef.current = { ...ghostRef.current, ...next };
@@ -126,7 +142,28 @@ export default function HeroDemo() {
     const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 });
     io.observe(el);
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setAuto(false);
+    setTouchUI(window.matchMedia('(pointer: coarse)').matches);
     return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = screenRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      scrolledAtRef.current = performance.now();
+    };
+    // Stops the page scrolling under a finger that has grabbed the slider. It has to be in place, and not
+    // passive, before the touch starts: iOS decides then whether the touch's moves can be cancelled.
+    const onTouchMove = (e: TouchEvent) => {
+      if (dragRef.current?.held && e.cancelable) e.preventDefault();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      el.removeEventListener('touchmove', onTouchMove);
+      clearTimeout(holdRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -175,7 +212,7 @@ export default function HeroDemo() {
         setGhost({ visible: true });
         await sleep(300);
         setGhost({ pressed: true });
-        await sleep(120);
+        await sleep(HOLD_MS);
         await tween(1900, (t) => {
           setCalories(snapCalories(520 * t));
           setGhost({ y: 660 - 300 * t });
@@ -190,7 +227,7 @@ export default function HeroDemo() {
         // Drag up to 38 g
         await moveTo(255, 660);
         setGhost({ pressed: true });
-        await sleep(120);
+        await sleep(HOLD_MS);
         await tween(1500, (t) => {
           setProtein(Math.round(38 * t));
           setGhost({ y: 660 - 260 * t });
@@ -228,27 +265,60 @@ export default function HeroDemo() {
 
   /* ── Direct manipulation ──────────────────────────────── */
 
+  const slider = step === 'calories' || step === 'protein';
+
+  const endDrag = () => {
+    clearTimeout(holdRef.current);
+    dragRef.current = null;
+  };
+
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    stopAuto();
+    const touch = e.pointerType !== 'mouse';
+    setTouchUI(touch);
+    // A touch may only be passing through on its way down the page, so it leaves autoplay alone until it
+    // turns out to be a tap or a hold.
+    if (!touch) stopAuto();
     if (step === 'today' || !screenRef.current) return;
+    if (touch && performance.now() - scrolledAtRef.current < SCROLL_SETTLE_MS) return;
     const rect = screenRef.current.getBoundingClientRect();
-    const value = step === 'calories' ? calories : protein;
     dragRef.current = {
       pointerId: e.pointerId,
+      touch,
+      held: false,
       x0: e.clientX,
       y0: e.clientY,
-      pos0: step === 'emoji' ? 0 : SCALES[step].position(value),
+      pos0: touch ? null : slider ? SCALES[step].position(step === 'calories' ? calories : protein) : 0,
       scale: rect.width / 393,
       left: rect.left,
       width: rect.width,
       moved: false,
     };
     e.currentTarget.setPointerCapture(e.pointerId);
+    if (touch && slider) {
+      const id = e.pointerId;
+      clearTimeout(holdRef.current);
+      holdRef.current = window.setTimeout(() => {
+        const d = dragRef.current;
+        if (!d || d.pointerId !== id) return;
+        d.held = true;
+        stopAuto();
+      }, HOLD_MS);
+    }
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
     if (!d || d.pointerId !== e.pointerId) return;
+    if (d.touch && !d.held) {
+      // Setting off before the hold is up makes it a swipe, and swipes belong to the page.
+      if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > HOLD_SLOP) endDrag();
+      return;
+    }
+    if (d.pos0 === null) {
+      d.pos0 = slider ? SCALES[step].position(step === 'calories' ? calories : protein) : 0;
+      d.x0 = e.clientX;
+      d.y0 = e.clientY;
+    }
     const dy = (d.y0 - e.clientY) / d.scale;
     const dx = (e.clientX - d.x0) / d.scale;
     if (!d.moved && Math.hypot(dx, dy) > TAP_SLOP) d.moved = true;
@@ -259,8 +329,10 @@ export default function HeroDemo() {
 
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
-    dragRef.current = null;
-    if (!d || d.pointerId !== e.pointerId || d.moved) return;
+    if (!d || d.pointerId !== e.pointerId) return;
+    endDrag();
+    if (d.moved || d.held) return;
+    stopAuto();
     if ((e.clientX - d.left) / d.width < BACK_ZONE) back();
     else advance();
   };
@@ -298,9 +370,13 @@ export default function HeroDemo() {
     step === 'calories' ? calorieAccent(calories) : step === 'protein' ? PROTEIN_BLUE : step === 'today' ? '#34c759' : '#c7c7cc';
 
   const hint = auto
-    ? 'Go on, have a go. Drag the screen.'
-    : step === 'calories' || step === 'protein'
-      ? 'Drag up or down anywhere. Tap to confirm.'
+    ? touchUI
+      ? 'Go on, have a go. Press and hold the screen, then drag.'
+      : 'Go on, have a go. Drag the screen.'
+    : slider
+      ? touchUI
+        ? 'Press and hold, then drag up or down. Tap to confirm.'
+        : 'Drag up or down anywhere. Tap to confirm.'
       : step === 'emoji'
         ? 'Pick a food, or just tap to skip.'
         : 'Tap + to add a meal.';
@@ -325,7 +401,7 @@ export default function HeroDemo() {
       <Phone className="[--s:0.64] sm:[--s:0.72] xl:[--s:0.78]" time="19:30" interactive>
         <div
           ref={screenRef}
-          className="absolute inset-0 cursor-grab outline-none active:cursor-grabbing"
+          className="absolute inset-0 cursor-grab touch-manipulation outline-none [-webkit-touch-callout:none] active:cursor-grabbing [&_.ios-fill]:will-change-transform"
           tabIndex={0}
           role="group"
           aria-roledescription="interactive demo"
@@ -333,7 +409,7 @@ export default function HeroDemo() {
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
-          onPointerCancel={() => (dragRef.current = null)}
+          onPointerCancel={endDrag}
           onKeyDown={onKeyDown}
         >
           {step === 'today' ? (
@@ -368,7 +444,7 @@ export default function HeroDemo() {
           )}
         </div>
       </Phone>
-      <p className="relative mt-6 text-sm text-muted" aria-live="polite">
+      <p className="relative mt-6 text-center text-sm text-balance text-muted" aria-live="polite">
         {hint}
         <span className="sr-only">{announce}</span>
       </p>

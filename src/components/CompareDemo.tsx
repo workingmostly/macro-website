@@ -151,15 +151,17 @@ function Card({ id, name, icon, steps, index, progress, dark = false, segment, g
             dark ? 'text-white/55' : 'text-muted'
           }`}
         >
+          {/* Each label in its own element: a page translator swaps bare text nodes for its own, and React then
+              throws trying to remove the original "Done" when the loop starts again. */}
           {done ? (
             <>
               <svg width="12" height="10" viewBox="0 0 12 10" fill="none" className="text-ios-green">
                 <path d="M1 5.2l3.3 3.3L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Done
+              <span>Done</span>
             </>
           ) : (
-            `Step ${index + 1} of ${total}`
+            <span>{`Step ${index + 1} of ${total}`}</span>
           )}
         </p>
         <p
@@ -207,7 +209,9 @@ export default function CompareDemo() {
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
-      tRef.current = (tRef.current + Math.min(100, now - last)) % LOOP;
+      // A frame's timestamp can be a few ms earlier than the performance.now() above. Left negative, the first
+      // step would take t below 0, to a step -1 that doesn't exist, and the whole demo would crash.
+      tRef.current = (tRef.current + Math.min(100, Math.max(0, now - last))) % LOOP;
       last = now;
       setT(tRef.current);
       raf = requestAnimationFrame(tick);

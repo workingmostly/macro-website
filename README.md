@@ -26,7 +26,7 @@ The iPhone screens in `src/components/screens/` are HTML recreations of the app,
 - `DragScale`: the non-linear drag gearing from `DragScale.swift`
 - `macroSplit()`: the 60/40 carbs/fat estimate from `MacroMath.swift`
 
-`HeroDemo.tsx` runs the real input flow (calories → protein → emoji → Today). It plays itself while nobody's touching it, and hands over control on the first drag, tap or key press.
+`HeroDemo.tsx` runs the real input flow (calories → protein → emoji → Today). It plays itself while nobody's touching it, and hands over control on the first drag, tap or key press. On a touch screen a finger has to rest for a moment (`HOLD_MS`) before it grabs the slider, so a swipe over the phone still scrolls the page.
 
 `CompareDemo.tsx` plays the same meal in a typical tracker and in Macro, one step per beat on both phones. The typical tracker's screens live in `screens/Typical.tsx`: deliberately generic and greyscale, standing for food-database trackers in general rather than any one app. The steps and captions are the `TYPICAL_STEPS` and `MACRO_STEPS` arrays. It pauses off screen, has a pause button, and with reduced motion (or no JavaScript) it shows both phones finished.
 

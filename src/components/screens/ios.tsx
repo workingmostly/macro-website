@@ -265,7 +265,7 @@ export function InputScreen({
 
   return (
     <div className="ios-input" style={{ '--accent': accent } as CSSProperties}>
-      {fill > 0 && <div className="ios-fill" style={{ height: `${fill * 100}%` }} />}
+      {fill > 0 && <div className="ios-fill" style={{ transform: `translateY(${(1 - fill) * 100}%)` }} />}
 
       <div className="ios-segments">
         {Array.from({ length: stepCount }, (_, i) => (

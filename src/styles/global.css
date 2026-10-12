@@ -272,14 +272,13 @@
     position: absolute;
     inset: 0;
     background: #fff;
-    touch-action: none;
   }
 
+  /* Full height and slid down rather than resized, so dragging it moves a layer instead of relaying out and
+     repainting the screen. Resizing it left a shrinking fill painted at its old height in some browsers. */
   .ios-fill {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     border-top: 1px solid var(--accent);
     background: color-mix(in srgb, var(--accent) 14%, #fff);
   }
