@@ -207,7 +207,9 @@ export default function CompareDemo() {
     let raf = 0;
     let last = performance.now();
     const tick = (now: number) => {
-      tRef.current = (tRef.current + Math.min(100, now - last)) % LOOP;
+      // A frame's timestamp can be a few ms earlier than the performance.now() above. Left negative, the first
+      // step would take t below 0, to a step -1 that doesn't exist, and the whole demo would crash.
+      tRef.current = (tRef.current + Math.min(100, Math.max(0, now - last))) % LOOP;
       last = now;
       setT(tRef.current);
       raf = requestAnimationFrame(tick);
