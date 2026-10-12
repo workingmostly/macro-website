@@ -444,7 +444,7 @@ export default function HeroDemo() {
           )}
         </div>
       </Phone>
-      <p className="relative mt-6 text-sm text-muted" aria-live="polite">
+      <p className="relative mt-6 text-center text-sm text-balance text-muted" aria-live="polite">
         {hint}
         <span className="sr-only">{announce}</span>
       </p>
