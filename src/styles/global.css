@@ -272,14 +272,13 @@
     position: absolute;
     inset: 0;
     background: #fff;
-    touch-action: none;
   }
 
+  /* Full height and slid down rather than resized, so dragging it moves a layer instead of relaying out and
+     repainting the screen. Resizing it left a shrinking fill painted at its old height in some browsers. */
   .ios-fill {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     border-top: 1px solid var(--accent);
     background: color-mix(in srgb, var(--accent) 14%, #fff);
   }
@@ -639,6 +638,22 @@
   .ghost-touch[data-pressed='true'] {
     transform: scale(0.82);
     background: rgb(0 0 0 / 0.22);
+  }
+
+  /* Rings the hero demo's screen while the slider is held, so a finger that has waited out the hold can
+     see it has it. Takes its colour from `color`. */
+  .grab-ring {
+    position: absolute;
+    z-index: 45;
+    inset: 0;
+    border-radius: 56px;
+    box-shadow: inset 0 0 0 6px currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+  }
+  .grab-ring[data-on='true'] {
+    opacity: 1;
   }
 }
 
