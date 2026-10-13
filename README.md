@@ -30,6 +30,10 @@ The iPhone screens in `src/components/screens/` are HTML recreations of the app,
 
 `CompareDemo.tsx` plays the same meal in a typical tracker and in Macro, one step per beat on both phones. The typical tracker's screens live in `screens/Typical.tsx`: deliberately generic and greyscale, standing for food-database trackers in general rather than any one app. The steps and captions are the `TYPICAL_STEPS` and `MACRO_STEPS` arrays. It pauses off screen, has a pause button, and with reduced motion (or no JavaScript) it shows both phones finished.
 
+## Instagram carousel
+
+`instagram/` holds the launch carousel as eight editable SVGs (1080 × 1350). Drag them into Figma to edit; the caption and alt text are in `instagram/README.md`. The folder sits outside `public/`, so it never ships with the site.
+
 ## Deploying
 
 `npm run build` produces a plain static site in `dist/`, so it can go on Vercel, Netlify, Cloudflare Pages or GitHub Pages with no adapter. Once there's a domain, set `site` in `astro.config.mjs` so Open Graph tags get absolute URLs.
