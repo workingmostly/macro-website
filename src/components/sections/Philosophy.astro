@@ -1,31 +1,74 @@
 ---
-const stats = [
-  { value: '2', body: 'numbers per meal. Calories and protein; everything else is estimated.' },
-  { value: '±10%', body: 'of your calorie goal still counts as a day on target.' },
-  { value: '0', body: 'accounts, ads or trackers. We never see a thing you log.' },
-];
+import { fmt } from '../screens/ios';
+
+const DAYS = 28;
+// A week logged to the calorie, then nothing.
+const precise = [2187, 1964, 2203, 2241, 2176, 2090, 2318];
+// Every day logged, roughly. A few run over, like the orange bars in the app's adherence chart.
+const over = new Set([9, 19, 24]);
+
+const cell = 'h-9 rounded-[9px] sm:h-11 sm:rounded-[11px]';
 ---
 
-<section class="px-3 pt-28 sm:px-4 sm:pt-40">
+<section id="why" class="px-3 sm:px-4" aria-labelledby="why-title">
   <div class="reveal rounded-card bg-surface px-6 py-20 text-center sm:px-12 sm:py-32">
     <p class="eyebrow text-ios-orange">Why it works</p>
-    <h2 class="display mx-auto mt-6 max-w-5xl text-[clamp(2.6rem,6.6vw,5.75rem)]">
+    <h2 id="why-title" class="display mx-auto mt-6 max-w-5xl text-[clamp(2.6rem,6.6vw,5.75rem)]">
       Roughly right every day beats perfectly right for a week.
     </h2>
     <p class="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
       You don't need to know that dinner was 612 calories. Knowing it was about 600, and that you're landing near
-      your goal most days, is what actually moves the needle. Macro is built for being mindful, not meticulous.
+      your goal most days, is what actually moves the needle.
+    </p>
+    <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
+      Weighing and logging every gram turns food into homework, and it's easy for the numbers to take over. Macro is
+      built for being mindful, not meticulous: quick enough to keep up, and easier on your head.
     </p>
 
-    <div class="mx-auto mt-16 grid max-w-5xl gap-3 sm:mt-20 sm:grid-cols-3 sm:gap-4">
-      {
-        stats.map((stat) => (
-          <div class="rounded-[2rem] bg-white px-7 py-9 text-left sm:px-8 sm:py-10">
-            <p class="display text-6xl sm:text-7xl">{stat.value}</p>
-            <p class="mt-4 text-[17px] leading-relaxed text-muted">{stat.body}</p>
-          </div>
-        ))
-      }
+    <div class="mx-auto mt-16 grid max-w-5xl gap-3 text-left sm:mt-20 sm:gap-4 md:grid-cols-2">
+      <figure class="rounded-[2rem] bg-white p-6 sm:p-9">
+        <figcaption class="flex items-baseline justify-between gap-4">
+          <span class="font-display text-2xl font-semibold tracking-[-0.03em]">Perfectly right</span>
+          <span class="text-[15px] text-faint">7 of {DAYS} days</span>
+        </figcaption>
+        <div
+          role="img"
+          aria-label="Seven days logged to the calorie, then three weeks with nothing logged"
+          class="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2"
+        >
+          {
+            Array.from({ length: DAYS }, (_, i) =>
+              i < precise.length ? (
+                <span class={`${cell} grid place-items-center bg-ink text-[10px] font-medium text-white tabular-nums sm:text-xs`}>
+                  {fmt(precise[i])}
+                </span>
+              ) : (
+                <span class={`${cell} border border-dashed border-ink/15`} />
+              ),
+            )
+          }
+        </div>
+        <p class="mt-6 text-[17px] leading-relaxed text-muted">
+          Every gram weighed, every barcode scanned. Then it all got a bit much.
+        </p>
+      </figure>
+
+      <figure class="rounded-[2rem] bg-white p-6 sm:p-9">
+        <figcaption class="flex items-baseline justify-between gap-4">
+          <span class="font-display text-2xl font-semibold tracking-[-0.03em]">Roughly right</span>
+          <span class="text-[15px] text-faint">{DAYS} of {DAYS} days</span>
+        </figcaption>
+        <div
+          role="img"
+          aria-label={`All ${DAYS} days logged, most of them close to the goal and a few over it`}
+          class="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2"
+        >
+          {Array.from({ length: DAYS }, (_, i) => <span class={`${cell} ${over.has(i) ? 'bg-[#f2a144]/90' : 'bg-ios-green/80'}`} />)}
+        </div>
+        <p class="mt-6 text-[17px] leading-relaxed text-muted">
+          About 600 here, about 400 there. A few days over, and still on track.
+        </p>
+      </figure>
     </div>
   </div>
 </section>
