@@ -32,7 +32,7 @@ The iPhone screens in `src/components/screens/` are HTML recreations of the app,
 
 ## Instagram carousel
 
-`instagram/` holds the launch carousel as five editable SVGs (1080 × 1350), with PNG previews in `instagram/previews/`. Drag the SVGs into Figma to edit; the caption and alt text are in `instagram/README.md`. The folder sits outside `public/`, so it never ships with the site.
+`instagram/` holds the launch carousel as six editable SVGs (1080 × 1350), MP4 versions of the two step-count slides, and PNG previews in `instagram/previews/`. Drag the SVGs into Figma to edit; the caption and alt text are in `instagram/README.md`. The folder sits outside `public/`, so it never ships with the site.
 
 ## Deploying
 
