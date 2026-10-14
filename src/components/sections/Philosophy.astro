@@ -46,8 +46,8 @@ const lanes = [
       tells you far more than a perfect week followed by nothing.
     </p>
 
-    <figure class="chart reveal mx-auto mt-14 max-w-5xl rounded-[2rem] bg-white p-5 text-left sm:mt-20 sm:p-10">
-      <p class="text-[15px] text-faint">An example: four weeks on a 2,200 kcal goal</p>
+    <figure class="reveal mx-auto mt-14 max-w-5xl rounded-[2rem] bg-white p-5 text-left sm:mt-20 sm:p-10">
+      <p class="text-[15px] text-muted">An example: four weeks on a 2,200 kcal goal</p>
 
       {
         lanes.map((lane, li) => {
@@ -61,11 +61,11 @@ const lanes = [
                 </div>
                 <div class="shrink-0 text-right">
                   <p class="font-display text-5xl leading-none font-semibold tracking-[-0.04em] sm:text-6xl">{count}</p>
-                  <p class="mt-1 text-[13px] whitespace-nowrap text-faint sm:text-sm">days within 10%</p>
+                  <p class="mt-1 text-[13px] whitespace-nowrap text-muted sm:text-sm">days within 10%</p>
                 </div>
               </div>
 
-              <div class="relative mt-4 h-28 sm:h-40" role="img" aria-label={lane.label}>
+              <div class="chart reveal relative mt-4 h-28 sm:h-40" role="img" aria-label={lane.label}>
                 <div class="absolute inset-x-0 bg-ios-green/15" style={`bottom:${pct(LOW)};height:${pct(HIGH - LOW)}`} />
                 <div class="absolute inset-x-0 border-t-[1.5px] border-dashed border-[#5aa9ff]" style={`bottom:${pct(GOAL)}`} />
                 <div class="relative grid h-full grid-cols-4 gap-2 sm:gap-5">
@@ -96,7 +96,7 @@ const lanes = [
                     >
                       Close enough: 1,980 to 2,420 kcal
                     </span>
-                    <span aria-hidden="true" class="absolute right-0 bottom-[30%] left-1/4 text-center text-[13px] text-faint sm:text-[15px]">
+                    <span aria-hidden="true" class="absolute right-0 bottom-[30%] left-1/4 text-center text-[13px] text-muted sm:text-[15px]">
                       Nothing logged
                     </span>
                   </>
@@ -107,7 +107,7 @@ const lanes = [
         })
       }
 
-      <div aria-hidden="true" class="mt-2.5 grid grid-cols-4 gap-2 text-center text-[12px] text-faint sm:gap-5 sm:text-[13px]">
+      <div aria-hidden="true" class="mt-2.5 grid grid-cols-4 gap-2 text-center text-[12px] text-muted sm:gap-5 sm:text-[13px]">
         <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
       </div>
 

@@ -165,8 +165,8 @@
     }
   }
 
-  /* The example month in "Why it works": bars grow from the baseline as the chart comes into view, one day
-     after another, so the perfect week visibly stops while the rough one keeps going. */
+  /* The example month in "Why it works": each lane's bars grow from the baseline as that lane comes into view,
+     one day after another, so the perfect week visibly stops while the rough one keeps going. */
   @media (prefers-reduced-motion: no-preference) {
     .js .chart .chart-bar {
       transform-origin: bottom;

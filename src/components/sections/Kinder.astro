@@ -28,7 +28,7 @@ const principles = [
   },
   {
     title: 'Nudges, not nagging.',
-    body: "Reminders learn when you usually eat and stay quiet about meals you've already logged. There's no account and no ads, and nobody sees what you log but you.",
+    body: "Reminders learn when you usually eat and stay quiet about meals you've already logged. There's no account and no ads, and what you log stays on your iPhone, and in your own iCloud if you sync.",
     tile: 'bg-surface',
     bell: true,
   },
@@ -53,7 +53,7 @@ const at = (v: number) => `${((v - 1700) / 1000) * 100}%`;
       </p>
     </div>
 
-    <ol class="reveal divide-y divide-line border-y border-line">
+    <ul class="reveal divide-y divide-line border-y border-line">
       {
         principles.map((p) => (
           <li class="grid grid-cols-[2.75rem_1fr] gap-5 py-8 sm:grid-cols-[3.25rem_1fr] sm:gap-6 sm:py-10">
@@ -96,7 +96,7 @@ const at = (v: number) => `${((v - 1700) / 1000) * 100}%`;
                   </div>
                   <div aria-hidden="true" class="relative mt-2 h-5 text-[13px] text-muted tabular-nums">
                     <span class="absolute -translate-x-1/2" style={`left:${at(1980)}`}>1,980</span>
-                    <span class="absolute -translate-x-1/2 text-ios-blue" style={`left:${at(2200)}`}>2,200</span>
+                    <span class="absolute -translate-x-1/2 text-ios-blue-dark" style={`left:${at(2200)}`}>2,200</span>
                     <span class="absolute -translate-x-1/2" style={`left:${at(2420)}`}>2,420</span>
                   </div>
                 </div>
@@ -105,6 +105,6 @@ const at = (v: number) => `${((v - 1700) / 1000) * 100}%`;
           </li>
         ))
       }
-    </ol>
+    </ul>
   </div>
 </section>

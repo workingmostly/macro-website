@@ -85,11 +85,15 @@ const faqs: { q: string; a: string; id?: string }[] = [
 </section>
 
 <script>
-  // A link straight to a question, like the note the "Keep count" section points to, opens its answer too.
-  const openLinked = () => {
-    const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  // A link straight to a question, like the note the "Keep count" section points to, opens its answer too:
+  // on arrival, and on every click, since clicking the same link again doesn't change the hash.
+  const open = (id: string) => {
+    const target = id && document.getElementById(id);
     if (target instanceof HTMLDetailsElement) target.open = true;
   };
-  openLinked();
-  window.addEventListener('hashchange', openLinked);
+  open(location.hash.slice(1));
+  document.addEventListener('click', (event) => {
+    const link = (event.target as Element | null)?.closest?.('a[href^="#"]');
+    if (link) open(link.getAttribute('href')!.slice(1));
+  });
 </script>
