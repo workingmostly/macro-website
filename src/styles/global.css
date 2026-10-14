@@ -164,6 +164,18 @@
       transform: none;
     }
   }
+
+  /* The example month in "Why it works": bars grow from the baseline as the chart comes into view, one day
+     after another, so the perfect week visibly stops while the rough one keeps going. */
+  @media (prefers-reduced-motion: no-preference) {
+    .js .chart .chart-bar {
+      transform-origin: bottom;
+      transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .js .chart:not(.is-visible) .chart-bar {
+      transform: scaleY(0);
+    }
+  }
 }
 
 @layer components {

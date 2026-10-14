@@ -1,74 +1,123 @@
 ---
 import { fmt } from '../screens/ios';
 
-const DAYS = 28;
-// A week logged to the calorie, then nothing.
-const precise = [2187, 1964, 2203, 2241, 2176, 2090, 2318];
-// Every day logged, roughly. A few run over, like the orange bars in the app's adherence chart.
-const over = new Set([9, 19, 24]);
+// An example month on the default goal, drawn on the same scale and colours as the app's week chart.
+const GOAL = 2200;
+const LOW = GOAL * 0.9;
+const HIGH = GOAL * 1.1;
+const MAX = 2800;
+const within = (v: number) => v >= LOW && v <= HIGH;
+const pct = (v: number) => `${(v / MAX) * 100}%`;
 
-const cell = 'h-9 rounded-[9px] sm:h-11 sm:rounded-[11px]';
+// Guesses that wobble but keep landing in the band, and three bigger days that don't.
+const rough = [
+  2150, 2300, 2050, 2250, 2200, 2350, 2100, 2250, 2100, 2600, 2200, 2050, 2300, 2150, 2200, 2350, 2100, 2250, 2000,
+  2650, 2300, 2150, 2250, 2050, 2550, 2200, 2300, 2100,
+];
+// A week logged to the calorie, then nothing.
+const weighed = [2187, 2203, 2241, 2176, 2090, 2318, 2164];
+
+const lanes = [
+  {
+    title: 'Roughly right, every day',
+    sub: 'About 2,200, give or take. A few days over.',
+    days: rough,
+    colour: (v: number) => (within(v) ? 'bg-ios-green' : 'bg-[#f2a144]'),
+    label: `All 28 days logged as rough guesses. ${rough.filter(within).length} land within 10% of the goal and the rest run over.`,
+  },
+  {
+    title: 'Perfectly right, for a week',
+    sub: 'Every gram weighed. Then it all got a bit much.',
+    days: weighed,
+    colour: () => 'bg-ink',
+    label: 'Week one logged to the calorie, all seven days within 10% of the goal. Weeks two to four: nothing logged.',
+  },
+];
 ---
 
 <section id="why" class="px-3 sm:px-4" aria-labelledby="why-title">
-  <div class="reveal rounded-card bg-surface px-6 py-20 text-center sm:px-12 sm:py-32">
+  <div class="reveal rounded-card bg-surface px-5 py-20 text-center sm:px-12 sm:py-32">
     <p class="eyebrow text-ios-orange">Why it works</p>
     <h2 id="why-title" class="display mx-auto mt-6 max-w-5xl text-[clamp(2.6rem,6.6vw,5.75rem)]">
       Roughly right every day beats perfectly right for a week.
     </h2>
     <p class="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
-      You don't need to know that dinner was 612 calories. Knowing it was about 600, and that you're landing near
-      your goal most days, is what actually moves the needle.
-    </p>
-    <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
-      Weighing and logging every gram turns food into homework, and it's easy for the numbers to take over. Macro is
-      built for being mindful, not meticulous: quick enough to keep up, and easier on your head.
+      You don't need to know that dinner was 612 calories. About 600 is close enough, and close enough every day
+      tells you far more than a perfect week followed by nothing.
     </p>
 
-    <div class="mx-auto mt-16 grid max-w-5xl gap-3 text-left sm:mt-20 sm:gap-4 md:grid-cols-2">
-      <figure class="rounded-[2rem] bg-white p-6 sm:p-9">
-        <figcaption class="flex items-baseline justify-between gap-4">
-          <span class="font-display text-2xl font-semibold tracking-[-0.03em]">Perfectly right</span>
-          <span class="text-[15px] text-faint">7 of {DAYS} days</span>
-        </figcaption>
-        <div
-          role="img"
-          aria-label="Seven days logged to the calorie, then three weeks with nothing logged"
-          class="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2"
-        >
-          {
-            Array.from({ length: DAYS }, (_, i) =>
-              i < precise.length ? (
-                <span class={`${cell} grid place-items-center bg-ink text-[10px] font-medium text-white tabular-nums sm:text-xs`}>
-                  {fmt(precise[i])}
-                </span>
-              ) : (
-                <span class={`${cell} border border-dashed border-ink/15`} />
-              ),
-            )
-          }
-        </div>
-        <p class="mt-6 text-[17px] leading-relaxed text-muted">
-          Every gram weighed, every barcode scanned. Then it all got a bit much.
-        </p>
-      </figure>
+    <figure class="chart reveal mx-auto mt-14 max-w-5xl rounded-[2rem] bg-white p-5 text-left sm:mt-20 sm:p-10">
+      <p class="text-[15px] text-faint">An example: four weeks on a 2,200 kcal goal</p>
 
-      <figure class="rounded-[2rem] bg-white p-6 sm:p-9">
-        <figcaption class="flex items-baseline justify-between gap-4">
-          <span class="font-display text-2xl font-semibold tracking-[-0.03em]">Roughly right</span>
-          <span class="text-[15px] text-faint">{DAYS} of {DAYS} days</span>
-        </figcaption>
-        <div
-          role="img"
-          aria-label={`All ${DAYS} days logged, most of them close to the goal and a few over it`}
-          class="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2"
-        >
-          {Array.from({ length: DAYS }, (_, i) => <span class={`${cell} ${over.has(i) ? 'bg-[#f2a144]/90' : 'bg-ios-green/80'}`} />)}
-        </div>
-        <p class="mt-6 text-[17px] leading-relaxed text-muted">
-          About 600 here, about 400 there. A few days over, and still on track.
+      {
+        lanes.map((lane, li) => {
+          const count = lane.days.filter(within).length;
+          return (
+            <div class={li === 0 ? 'mt-6' : 'mt-10'}>
+              <div class="flex items-end justify-between gap-4">
+                <div class="min-w-0">
+                  <h3 class="font-display text-[22px] leading-tight font-semibold tracking-[-0.03em] sm:text-2xl">{lane.title}</h3>
+                  <p class="mt-1 text-[14px] text-muted sm:text-[15px]">{lane.sub}</p>
+                </div>
+                <div class="shrink-0 text-right">
+                  <p class="font-display text-5xl leading-none font-semibold tracking-[-0.04em] sm:text-6xl">{count}</p>
+                  <p class="mt-1 text-[13px] whitespace-nowrap text-faint sm:text-sm">days within 10%</p>
+                </div>
+              </div>
+
+              <div class="relative mt-4 h-28 sm:h-40" role="img" aria-label={lane.label}>
+                <div class="absolute inset-x-0 bg-ios-green/15" style={`bottom:${pct(LOW)};height:${pct(HIGH - LOW)}`} />
+                <div class="absolute inset-x-0 border-t-[1.5px] border-dashed border-[#5aa9ff]" style={`bottom:${pct(GOAL)}`} />
+                <div class="relative grid h-full grid-cols-4 gap-2 sm:gap-5">
+                  {[0, 1, 2, 3].map((w) => (
+                    <div class="flex h-full items-end gap-[2px] sm:gap-1">
+                      {Array.from({ length: 7 }, (_, d) => {
+                        const i = w * 7 + d;
+                        const v = lane.days[i];
+                        return v ? (
+                          <span
+                            class={`chart-bar flex-1 rounded-t-[3px] sm:rounded-t-[4px] ${lane.colour(v)}`}
+                            style={`height:${pct(v)};transition-delay:${i * 18}ms`}
+                            title={`Week ${w + 1}, day ${d + 1}: ${fmt(v)} kcal`}
+                          />
+                        ) : (
+                          <span class="h-1 flex-1 rounded-full bg-line" />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+                {li === 1 && (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      class="absolute right-0 text-[12px] font-medium text-muted sm:text-[13px]"
+                      style={`bottom:calc(${pct(HIGH)} + 4px)`}
+                    >
+                      Close enough: 1,980 to 2,420 kcal
+                    </span>
+                    <span aria-hidden="true" class="absolute right-0 bottom-[30%] left-1/4 text-center text-[13px] text-faint sm:text-[15px]">
+                      Nothing logged
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })
+      }
+
+      <div aria-hidden="true" class="mt-2.5 grid grid-cols-4 gap-2 text-center text-[12px] text-faint sm:gap-5 sm:text-[13px]">
+        <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
+      </div>
+
+      <figcaption class="mt-7 border-t border-line pt-6">
+        <p class="text-[17px] font-medium">Both land in the band. Only one is still going.</p>
+        <p class="mt-1.5 text-[15px] leading-relaxed text-muted">
+          The green band is how Macro decides whether a day counts: calories within 10% of your goal, with protein
+          close or over.
         </p>
-      </figure>
-    </div>
+      </figcaption>
+    </figure>
   </div>
 </section>
