@@ -29,9 +29,13 @@ const WEEK = [
   { day: 'S', kcal: 2210 },
 ];
 const average = WEEK.reduce((t, d) => t + d.kcal, 0) / WEEK.length;
-const chart = { w: 300, h: 132, left: 6, base: 108, max: 2800 };
-const y = (v: number) => chart.base - ((chart.base - 6) * v) / chart.max;
-const slot = (chart.w - chart.left) / WEEK.length;
+const chart = { w: 300, h: 112, top: 4, base: 92, max: 2800 };
+const y = (v: number) => chart.base - ((chart.base - chart.top) * v) / chart.max;
+const slot = chart.w / WEEK.length;
+const barWidth = slot * 0.5;
+// A column, square at the baseline with a 4px rounded top.
+const column = (x: number, top: number, r = 4) =>
+  `M${x} ${chart.base}V${top + r}A${r} ${r} 0 0 1 ${x + r} ${top}H${x + barWidth - r}A${r} ${r} 0 0 1 ${x + barWidth} ${top + r}V${chart.base}Z`;
 
 // "Log as little as you like": the spag bol from the comparison, with carbs and fat worked out the app's way.
 const MEAL = { calories: 500, protein: 35 };
@@ -111,38 +115,35 @@ const left = MEAL.calories - 4 * MEAL.protein;
       body="Go over on Saturday, come in a little under on Monday. Across the week it evens out, and that matters far more than whether every single day hits the number."
     >
       <div
-        class="ios-scope w-full max-w-[330px] rounded-[22px] bg-white px-5 pt-5 pb-4 shadow-[0_16px_40px_-16px_rgb(0_0_0/0.25)]"
+        class="ios-scope w-full max-w-[330px] rounded-[22px] bg-white p-5 shadow-[0_16px_40px_-16px_rgb(0_0_0/0.25)]"
         role="img"
-        aria-label={`An example week: under the goal on Monday, well over on Saturday, and an average of ${fmt(average)} calories on a ${fmt(GOAL)} goal.`}
+        aria-label={`An example week: under the goal on Monday, well over on Saturday, and an average of ${fmt(average)} calories, inside the range around a ${fmt(GOAL)} goal.`}
       >
-        <div class="flex items-baseline justify-between text-[15px]">
+        <div class="flex items-center justify-between text-[15px]">
           <span class="text-muted">This week</span>
-          <span class="font-semibold tabular-nums">{fmt(average)} <span class="font-normal text-muted">average</span></span>
+          <span class="flex items-center gap-2 tabular-nums">
+            <span class="h-0.5 w-4 rounded-full bg-ink"></span>
+            <span><span class="font-semibold">{fmt(average)}</span> <span class="text-muted">average</span></span>
+          </span>
         </div>
-        <svg viewBox={`0 0 ${chart.w} ${chart.h}`} class="mt-3 block w-full" aria-hidden="true">
-          <rect x={chart.left} y={y(HIGH)} width={chart.w - chart.left} height={y(LOW) - y(HIGH)} fill="rgb(52 199 89 / 0.12)"></rect>
+        <svg viewBox={`0 0 ${chart.w} ${chart.h}`} class="mt-4 block w-full" aria-hidden="true">
+          <rect y={y(HIGH)} width={chart.w} height={y(LOW) - y(HIGH)} fill="rgb(52 199 89 / 0.12)"></rect>
           {
             WEEK.map((d, i) => {
-              const bw = slot * 0.62;
-              const x = chart.left + i * slot + (slot - bw) / 2;
+              const x = i * slot + (slot - barWidth) / 2;
               const inBand = d.kcal >= LOW && d.kcal <= HIGH;
               return (
                 <g>
-                  <rect x={x} y={y(d.kcal)} width={bw} height={chart.base - y(d.kcal)} rx="4" fill={inBand ? '#34c759' : '#f2a144'} />
-                  <text x={x + bw / 2} y={chart.h - 6} text-anchor="middle" font-size="12" fill="#8a8a8e">
+                  <path d={column(x, y(d.kcal))} fill={inBand ? '#34c759' : '#f2a144'} />
+                  <text x={x + barWidth / 2} y={chart.h - 4} text-anchor="middle" font-size="12" fill="#8a8a8e">
                     {d.day}
                   </text>
                 </g>
               );
             })
           }
-          <line x1={chart.left} x2={chart.w} y1={y(GOAL)} y2={y(GOAL)} stroke="#5aa9ff" stroke-width="1.5" stroke-dasharray="4 3"></line>
-          <line x1={chart.left} x2={chart.w} y1={y(average)} y2={y(average)} stroke="#0a0a0a" stroke-width="2"></line>
+          <line x2={chart.w} y1={y(average)} y2={y(average)} stroke="#0a0a0a" stroke-width="2"></line>
         </svg>
-        <div class="mt-2 flex items-center gap-4 text-[12px] text-muted">
-          <span class="flex items-center gap-1.5"><span class="h-0.5 w-4 rounded-full bg-ink"></span>Average</span>
-          <span class="flex items-center gap-1.5"><span class="w-4 border-t-[1.5px] border-dashed border-[#5aa9ff]"></span>Goal</span>
-        </div>
       </div>
     </FeatureCard>
 
