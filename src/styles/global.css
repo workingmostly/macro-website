@@ -194,35 +194,6 @@
       transition-delay: 1.4s;
     }
   }
-
-  /* "About right is the aim": the exact counts drift in one by one as the card arrives, then the round number lands
-     over them. Without JS, or with reduced motion, they're all just there. */
-  @media (prefers-reduced-motion: no-preference) {
-    .js .about-right .exact {
-      opacity: 0;
-      translate: 0 8px;
-      transition:
-        opacity 0.5s ease,
-        translate 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
-    }
-    .js .about-right .round {
-      opacity: 0;
-      scale: 0.9;
-      transition:
-        opacity 0.4s ease,
-        scale 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
-    }
-    .js .is-visible .about-right .exact {
-      opacity: 1;
-      translate: none;
-      transition-delay: calc(0.3s + var(--i) * 0.12s);
-    }
-    .js .is-visible .about-right .round {
-      opacity: 1;
-      scale: none;
-      transition-delay: 0.95s;
-    }
-  }
 }
 
 @layer components {

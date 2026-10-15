@@ -55,12 +55,12 @@ const left = MEAL.calories - 4 * MEAL.protein;
       body="There's nothing to weigh or look up. Drag to roughly how big the meal was. The drag is finest where most meals land, so a sensible guess takes seconds."
     >
       <div
-        class="about-right relative h-[190px] w-full max-w-[300px] font-display font-semibold tracking-[-0.03em]"
+        class="relative h-[190px] w-full max-w-[300px] font-display font-semibold tracking-[-0.03em]"
         role="img"
         aria-label="612, 587, 596 and 604 calories: all of them are about 600."
       >
-        {EXACT.map(({ kcal, at }, i) => <span class:list={['exact absolute', at]} style={`--i:${i}`}>{kcal}</span>)}
-        <span class="round absolute inset-0 grid place-items-center text-[64px] leading-none tracking-[-0.04em]">
+        {EXACT.map(({ kcal, at }) => <span class:list={['absolute', at]}>{kcal}</span>)}
+        <span class="absolute inset-0 grid place-items-center text-[64px] leading-none tracking-[-0.04em]">
           <span><span class="text-ios-green">≈</span>600</span>
         </span>
       </div>
