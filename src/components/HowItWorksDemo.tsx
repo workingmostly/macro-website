@@ -23,8 +23,8 @@ const STEPS = [
   {
     title: 'We do the rest',
     body: 'Macro does the maths. Carbs and fat are estimated from the calories left after protein, and the meal drops into your day with everything filled in.',
-    tint: 'bg-orange-tint',
-    glow: 'rgb(255 149 0 / 0.2)',
+    tint: 'bg-surface',
+    glow: 'rgb(0 0 0 / 0.06)',
   },
 ];
 
