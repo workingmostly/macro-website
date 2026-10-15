@@ -27,7 +27,7 @@
 
   --radius-card: 2.5rem;
 
-  --animate-marquee: marquee 50s linear infinite;
+  --animate-marquee: marquee 130s linear infinite;
   @keyframes marquee {
     to {
       transform: translateX(-50%);
@@ -165,9 +165,9 @@
     }
   }
 
-  /* "Why it works": both lines write the same days at the same pace as the figure comes into view. The neat one
-     stops and takes its full stop; the loose one carries on out of the card. Without JS, or with reduced motion,
-     the finished drawing just shows. */
+  /* "Why it works": both lines write at the same pace as the figure comes into view (each path sets its length and
+     duration). The neat one stops and takes its full stop; the loose one carries on off the edge of the card.
+     Without JS, or with reduced motion, the finished drawing just shows. */
   @media (prefers-reduced-motion: no-preference) {
     .js .why-lines .line {
       stroke-dasharray: var(--len) calc(var(--len) + 24px);
@@ -186,12 +186,7 @@
     .js .why-lines.is-visible .line {
       stroke-dashoffset: 0;
       transition-delay: 0.3s;
-    }
-    .js .why-lines.is-visible .line-perfect {
-      transition-duration: 1.12s;
-    }
-    .js .why-lines.is-visible .line-rough {
-      transition-duration: 2.2s;
+      transition-duration: var(--dur);
     }
     .js .why-lines.is-visible .full-stop {
       opacity: 1;

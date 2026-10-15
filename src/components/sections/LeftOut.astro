@@ -1,14 +1,9 @@
 ---
-const items = [
-  'Barcode scanning',
-  'Food databases',
-  'Food photos',
-  'Kitchen scales',
-  'Serving sizes',
-  'Ingredient lists',
-  'Accounts',
-  'Ads',
-];
+const items = ['Barcode scanning', 'Food databases', 'Food photos', 'Serving sizes', 'Ingredient lists', 'Accounts', 'Ads'];
+
+// The track holds two identical copies and slides one copy's width, then starts again. That's only seamless while a
+// copy is wider than the screen, so each copy repeats the list enough times to outlast very wide displays.
+const REPEATS = 3;
 ---
 
 <section class="py-14 sm:py-20" aria-labelledby="left-out">
@@ -20,12 +15,17 @@ const items = [
       {
         [0, 1].map((copy) => (
           <ul class="flex shrink-0 items-center" aria-hidden={copy === 1 ? 'true' : undefined}>
-            {items.map((item) => (
-              <li class="flex items-center font-display text-[1.75rem] font-medium tracking-[-0.03em] text-ink/30 sm:text-4xl">
-                <span class="strike">{item}</span>
-                <span class="mx-8 inline-block w-1.5 sm:mx-12" />
-              </li>
-            ))}
+            {Array.from({ length: REPEATS }, (_, repeat) =>
+              items.map((item) => (
+                <li
+                  aria-hidden={repeat > 0 ? 'true' : undefined}
+                  class="flex items-center font-display text-[1.75rem] font-medium tracking-[-0.03em] text-ink/30 sm:text-4xl"
+                >
+                  <span class="strike">{item}</span>
+                  <span class="mx-8 inline-block w-1.5 sm:mx-12" />
+                </li>
+              )),
+            )}
           </ul>
         ))
       }

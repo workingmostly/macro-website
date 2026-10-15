@@ -1,39 +1,46 @@
 ---
-import { FULL_STOP, PERFECT, PERFECT_LENGTH, ROUGH, ROUGH_LENGTH } from '../handwriting';
+import { FULL_STOP, PERFECT, PERFECT_LENGTH, RIGHT_EDGE, ROUGH, ROUGH_LENGTH } from '../handwriting';
+
+// The drawing is scaled so 1,000 of its units span the text column (one and a half columns on a phone, where it's
+// drawn bigger). The loose line runs on past the column to the right until the section's rounded card clips it.
+const LEFT = 96;
+const span = (RIGHT_EDGE - LEFT) / 1000;
+// Both lines write at the same pace, about a loop every 0.17 s: 7 loops for the neat one, 40 for the loose one.
+const PER_LOOP = 0.168;
 ---
 
 <section id="why" class="px-3 sm:px-4" aria-labelledby="why-title">
-  <div class="reveal rounded-card bg-surface px-6 py-20 text-center sm:px-12 sm:py-32">
+  <div class="reveal overflow-hidden rounded-card bg-surface px-6 py-20 text-center sm:px-12 sm:py-32">
     <p class="eyebrow text-ios-orange">Why it works</p>
     <h2 id="why-title" class="display mx-auto mt-6 max-w-5xl text-[clamp(2.6rem,6.6vw,5.75rem)]">
-      Roughly right every day <span class="text-muted">beats perfectly right for a week.</span>
+      Roughly right every day beats perfectly right for a week.
     </h2>
     <p class="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
       You don't need to know that dinner was 612 calories. About 600 is close enough, and close enough every day
       tells you far more than a perfect week followed by nothing.
     </p>
 
-    <!-- Two lines of handwriting: the loose one keeps going off the card, the neat one stops at a full stop.
-         On a phone the drawing is wider than the card, so only the loose line's run-on is cropped. -->
-    <figure class="why-lines reveal mx-auto mt-14 max-w-4xl overflow-hidden rounded-[2rem] bg-white py-10 pl-5 sm:mt-20 sm:py-14 sm:pl-12">
+    <!-- Two lines of handwriting: the neat one stops at a full stop, the loose one keeps going off the card. -->
+    <figure class="why-lines reveal mx-auto mt-14 max-w-4xl sm:mt-20">
       <svg
-        class="block h-auto w-[150%] max-w-none sm:w-full"
-        viewBox="96 670 1000 390"
+        class="block h-auto w-[calc(var(--span)*150%)] max-w-none sm:w-[calc(var(--span)*100%)]"
+        style={`--span:${span}`}
+        viewBox={`${LEFT} 670 ${RIGHT_EDGE - LEFT} 390`}
         fill="none"
         role="img"
-        aria-label="Two hand-drawn lines of loops, like joined-up handwriting. A loose green line, every loop a little different, keeps going past the edge. Below it, a neat grey line of seven identical loops stops with a full stop."
+        aria-label="Two hand-drawn lines of loops, like joined-up handwriting. A loose green line, every loop a little different, keeps going off the edge. Below it, a neat grey line of seven identical loops stops with a full stop."
       >
         <path
-          class="line line-rough"
-          style={`--len:${ROUGH_LENGTH}px`}
+          class="line"
+          style={`--len:${ROUGH_LENGTH}px;--dur:${(40 * PER_LOOP).toFixed(2)}s`}
           d={ROUGH}
           stroke="#34c759"
           stroke-width="12"
           stroke-linecap="round"
           stroke-linejoin="round"></path>
         <path
-          class="line line-perfect"
-          style={`--len:${PERFECT_LENGTH}px`}
+          class="line"
+          style={`--len:${PERFECT_LENGTH}px;--dur:${(7 * PER_LOOP).toFixed(2)}s`}
           d={PERFECT}
           stroke="#6e6e73"
           stroke-width="7"
