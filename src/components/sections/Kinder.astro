@@ -1,0 +1,188 @@
+---
+import FeatureCard from './FeatureCard.astro';
+import { Wand, fmt, macroSplit } from '../screens/ios';
+
+const GOAL = 2200;
+const LOW = GOAL * 0.9;
+const HIGH = GOAL * 1.1;
+
+// "About right is the aim": four exact counts of the same dinner, scattered and faint, around the one that matters.
+const EXACT = [
+  { kcal: 612, at: 'top-2.5 left-7 -rotate-6 text-[26px] text-ink/20' },
+  { kcal: 587, at: 'top-[18px] right-[34px] rotate-3 text-[22px] text-ink/15' },
+  { kcal: 596, at: 'bottom-3.5 left-11 rotate-2 text-[22px] text-ink/15' },
+  { kcal: 604, at: 'right-[18px] bottom-[22px] -rotate-3 text-[26px] text-ink/20' },
+];
+
+// "A bit over still counts": a day at 2,350 on the default goal, inside the 10% band, on a 1,700–2,700 track.
+const DAY = 2350;
+const at = (v: number) => `${((v - 1700) / 1000) * 100}%`;
+
+// "Room for the weekend": an example week, under on Monday and well over on Saturday, that averages out near the goal.
+const WEEK = [
+  { day: 'M', kcal: 1950 },
+  { day: 'T', kcal: 2050 },
+  { day: 'W', kcal: 2000 },
+  { day: 'T', kcal: 2100 },
+  { day: 'F', kcal: 2250 },
+  { day: 'S', kcal: 2700 },
+  { day: 'S', kcal: 2210 },
+];
+const average = WEEK.reduce((t, d) => t + d.kcal, 0) / WEEK.length;
+const chart = { w: 300, h: 112, top: 4, base: 92, max: 2800 };
+const y = (v: number) => chart.base - ((chart.base - chart.top) * v) / chart.max;
+const slot = chart.w / WEEK.length;
+const barWidth = slot * 0.5;
+// A column, square at the baseline with a 4px rounded top.
+const column = (x: number, top: number, r = 4) =>
+  `M${x} ${chart.base}V${top + r}A${r} ${r} 0 0 1 ${x + r} ${top}H${x + barWidth - r}A${r} ${r} 0 0 1 ${x + barWidth} ${top + r}V${chart.base}Z`;
+
+// "Log as little as you like": the spag bol from the comparison, with carbs and fat worked out the app's way.
+const MEAL = { calories: 500, protein: 35 };
+const { carbs, fat } = macroSplit(MEAL.calories, MEAL.protein);
+const left = MEAL.calories - 4 * MEAL.protein;
+---
+
+<section id="kinder" class="px-3 pt-28 sm:px-4 sm:pt-40" aria-labelledby="kinder-title">
+  <div class="reveal mx-auto max-w-3xl px-3 text-center">
+    <p class="eyebrow text-ios-green">Balance</p>
+    <h2 id="kinder-title" class="display mt-5 text-[clamp(2.6rem,6.4vw,4.75rem)]">Keep count without it taking over.</h2>
+    <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">
+      Counting every gram can turn food into homework, and it's easy for the numbers to take over. Macro is built for
+      the middle ground: a sensible estimate, kept up, with room for real life.
+    </p>
+  </div>
+
+  <div class="mt-14 grid gap-3 sm:mt-20 sm:gap-4 md:grid-cols-2">
+    <FeatureCard
+      title="About right is the aim."
+      body="There's nothing to weigh or look up. Drag to roughly how big the meal was. The drag is finest where most meals land, so a sensible guess takes seconds."
+    >
+      <div
+        class="relative h-[190px] w-full max-w-[300px] font-display font-semibold tracking-[-0.03em]"
+        role="img"
+        aria-label="612, 587, 596 and 604 calories: all of them are about 600."
+      >
+        {EXACT.map(({ kcal, at }) => <span class:list={['absolute', at]}>{kcal}</span>)}
+        <span class="absolute inset-0 grid place-items-center text-[64px] leading-none tracking-[-0.04em]">
+          <span><span class="text-ios-green">≈</span>600</span>
+        </span>
+      </div>
+    </FeatureCard>
+
+    <FeatureCard
+      title="A bit over still counts."
+      body="A day counts when calories land within 10% of your goal, over or under, and protein gets close or goes over. On a 2,200 kcal goal, that's anywhere from 1,980 to 2,420."
+    >
+      <div
+        class="ios-scope w-full max-w-[330px] rounded-[22px] bg-white p-5 shadow-[0_16px_40px_-16px_rgb(0_0_0/0.25)]"
+        role="img"
+        aria-label={`A day at ${fmt(DAY)} calories on a ${fmt(GOAL)} goal still counts: anything from 1,980 to 2,420 does.`}
+      >
+        <div class="flex items-baseline justify-between text-[15px]">
+          <span class="text-muted">Today</span>
+          <span class="font-semibold tabular-nums">{fmt(DAY)} <span class="font-normal text-muted">/ {fmt(GOAL)} kcal</span></span>
+        </div>
+        <div class="relative mt-5 h-3 rounded-full bg-surface">
+          <div
+            class="absolute inset-y-0 rounded-full bg-ios-green/35 ring-2 ring-ios-green/70 ring-inset"
+            style={`left:${at(LOW)};right:calc(100% - ${at(HIGH)})`}
+          >
+          </div>
+          <div class="absolute -inset-y-1.5 border-l-2 border-dashed border-[#5aa9ff]" style={`left:${at(GOAL)}`}></div>
+          <span
+            class="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ios-green ring-[3px] ring-white"
+            style={`left:${at(DAY)}`}
+          >
+          </span>
+        </div>
+        <div aria-hidden="true" class="relative mt-2 h-5 text-[12px] text-muted tabular-nums">
+          <span class="absolute -translate-x-1/2" style={`left:${at(LOW)}`}>1,980</span>
+          <span class="absolute -translate-x-1/2 text-ios-blue-dark" style={`left:${at(GOAL)}`}>2,200</span>
+          <span class="absolute -translate-x-1/2" style={`left:${at(HIGH)}`}>2,420</span>
+        </div>
+        <p class="mt-3 flex items-center gap-1.5 text-[14px] font-semibold text-[#248a3d]">
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true">
+            <path d="M1 5.2l3.3 3.3L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          Still counts
+        </p>
+      </div>
+    </FeatureCard>
+
+    <FeatureCard
+      title="Room for the weekend."
+      body="Go over on Saturday, come in a little under on Monday. Across the week it evens out, and that matters far more than whether every single day hits the number."
+    >
+      <div
+        class="ios-scope w-full max-w-[330px] rounded-[22px] bg-white p-5 shadow-[0_16px_40px_-16px_rgb(0_0_0/0.25)]"
+        role="img"
+        aria-label={`An example week: under the goal on Monday, well over on Saturday, and an average of ${fmt(average)} calories, inside the range around a ${fmt(GOAL)} goal.`}
+      >
+        <div class="flex items-center justify-between text-[15px]">
+          <span class="text-muted">This week</span>
+          <span class="flex items-center gap-2 tabular-nums">
+            <span class="h-0.5 w-4 rounded-full bg-ink"></span>
+            <span><span class="font-semibold">{fmt(average)}</span> <span class="text-muted">average</span></span>
+          </span>
+        </div>
+        <svg viewBox={`0 0 ${chart.w} ${chart.h}`} class="mt-4 block w-full" aria-hidden="true">
+          <rect y={y(HIGH)} width={chart.w} height={y(LOW) - y(HIGH)} fill="rgb(52 199 89 / 0.12)"></rect>
+          {
+            WEEK.map((d, i) => {
+              const x = i * slot + (slot - barWidth) / 2;
+              const inBand = d.kcal >= LOW && d.kcal <= HIGH;
+              return (
+                <g>
+                  <path d={column(x, y(d.kcal))} fill={inBand ? '#34c759' : '#f2a144'} />
+                  <text x={x + barWidth / 2} y={chart.h - 4} text-anchor="middle" font-size="12" fill="#8a8a8e">
+                    {d.day}
+                  </text>
+                </g>
+              );
+            })
+          }
+          <line x2={chart.w} y1={y(average)} y2={y(average)} stroke="#0a0a0a" stroke-width="2"></line>
+        </svg>
+      </div>
+    </FeatureCard>
+
+    <FeatureCard
+      title="Log as little as you like."
+      body="Log calories and protein, and Macro works out carbs and fat from the calories left over, so two numbers give you the whole picture. Rather keep it to calories? That's fine too."
+    >
+      <div class="w-full max-w-[330px]">
+        <div class="ios-scope rounded-[22px] bg-white px-5 py-4 shadow-[0_16px_40px_-16px_rgb(0_0_0/0.25)]">
+          <div class="grid gap-2 text-[16px]">
+            <div class="flex items-center justify-between">
+              <span>Calories</span><span class="font-semibold tabular-nums">{MEAL.calories} kcal</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>Protein</span><span class="font-semibold tabular-nums">{MEAL.protein} g</span>
+            </div>
+          </div>
+          <div class="mt-3 grid gap-2 border-t-[0.5px] border-black/15 pt-3 text-[16px]">
+            <div class="flex items-center gap-2">
+              <span>Carbs</span>
+              <span class="ios-estimated"><Wand /> Estimated</span>
+              <span class="ml-auto text-muted tabular-nums">{carbs} g</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span>Fat</span>
+              <span class="ios-estimated"><Wand /> Estimated</span>
+              <span class="ml-auto text-muted tabular-nums">{fat} g</span>
+            </div>
+          </div>
+        </div>
+        <p class="mt-3 text-center font-mono text-[12px] text-ink/45">
+          {MEAL.calories} − 4 × {MEAL.protein} = {left} kcal → 60% carbs, 40% fat
+        </p>
+      </div>
+    </FeatureCard>
+  </div>
+
+  <p class="reveal mt-10 text-center text-[15px] text-muted">
+    Found counting calories hard in the past?{' '}
+    <a href="#faq-hard" class="text-ink underline decoration-ink/20 underline-offset-4 hover:decoration-ink">A note before you start</a>.
+  </p>
+</section>

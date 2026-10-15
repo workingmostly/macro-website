@@ -2,7 +2,7 @@
 
 Marketing site for **Macro**, the radically simple calorie and protein tracker for iPhone.
 
-Built with [Astro](https://astro.build) and Tailwind CSS v4. The site is static HTML. The only JavaScript is two React islands (the interactive phone in the hero and the side-by-side comparison) and a small scroll-reveal script. Fonts (Inter and Inter Tight) are self-hosted, so nothing calls a third party.
+Built with [Astro](https://astro.build) and Tailwind CSS v4. The site is static HTML. The only JavaScript is three React islands (the interactive phone in the hero, the How it works cards and the side-by-side comparison) and a few small scripts for the nav, the FAQ and scroll reveals. Fonts (Inter and Inter Tight) are self-hosted, so nothing calls a third party.
 
 ## Running it
 
@@ -28,7 +28,13 @@ The iPhone screens in `src/components/screens/` are HTML recreations of the app,
 
 `HeroDemo.tsx` runs the real input flow (calories → protein → emoji → Today). It plays itself while nobody's touching it, and hands over control on the first drag, tap or key press. On a touch screen a finger has to rest for a moment (`HOLD_MS`) before it grabs the slider, so a swipe over the phone still scrolls the page.
 
+`HowItWorksDemo.tsx` plays the three How it works cards in turn while they're on screen: a drag for calories, a drag for protein, then the meal landing in Today with carbs and fat estimated. Like the comparison, it shows each card finished with reduced motion or no JavaScript.
+
 `CompareDemo.tsx` plays the same meal in a typical tracker and in Macro, one step per beat on both phones. The typical tracker's screens live in `screens/Typical.tsx`: deliberately generic and greyscale, standing for food-database trackers in general rather than any one app. The steps and captions are the `TYPICAL_STEPS` and `MACRO_STEPS` arrays. It pauses off screen, has a pause button, and with reduced motion (or no JavaScript) it shows both phones finished.
+
+## Instagram carousel
+
+`instagram/` holds the launch carousel as six editable SVGs (1080 × 1350), MP4 versions of the two step-count slides, and PNG previews in `instagram/previews/`. Drag the SVGs into Figma to edit; the caption and alt text are in `instagram/README.md`. The folder sits outside `public/`, so it never ships with the site.
 
 ## Deploying
 

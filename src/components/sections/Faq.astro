@@ -1,14 +1,31 @@
 ---
 import { site } from '../../config';
 
-const faqs = [
+const faqs: { q: string; a: string; id?: string }[] = [
   {
     q: 'How do I get Macro?',
     a: `Macro is in public beta on TestFlight, Apple's app for testing new apps. Tap "${site.ctaLabel}" on your iPhone, install TestFlight if you don't have it, and you're in. It needs iOS 17 or later.`,
   },
   {
+    q: 'Is Macro really free?',
+    a: "Yes, and it'll stay free. There are no ads, and you're not paying with your data either: Macro has no server, so we never see what you log.",
+  },
+  {
     q: "I don't know how many calories are in my food. Is Macro for me?",
-    a: "If you've tracked before, you probably know more than you think, and Macro is built for exactly that. If you're starting out, packet labels and a quick search will calibrate you within a week or two. A ballpark figure logged every day is far more useful than a precise one you give up on.",
+    a: "If you've tracked before, you probably know more than you think, and Macro is built for exactly that. If you're starting out, packet labels and a quick search will soon give you a feel for it. A ballpark figure logged every day is far more useful than a precise one that gets too much to keep up.",
+  },
+  {
+    q: "Won't rough numbers throw my tracking off?",
+    a: "Not in a way that matters. Say you're 10% out on a 600 kcal dinner: that's 60 kcal. Labels are rounded, portions vary and no two apples are the same, so even careful tracking is an estimate. What makes the difference is landing near your goal most days, and that's far easier to keep up when logging takes seconds.",
+  },
+  {
+    q: 'What if I miss a day?',
+    a: "Then you've missed a day, and that's fine. Pick it up at your next meal; there's nothing to catch up on.",
+  },
+  {
+    id: 'faq-hard',
+    q: 'What if counting calories has been hard for me before?',
+    a: "If counting has felt stressful, or hard to put down, it's worth talking to your GP before you start. Macro is built to keep tracking light, but it's still a calorie tracker. How you feel about food matters more than any number, and deciding it isn't right for you at the moment is a perfectly good choice.",
   },
   {
     q: 'How are carbs and fat worked out?',
@@ -16,7 +33,7 @@ const faqs = [
   },
   {
     q: 'Why is there no barcode scanner or food database?',
-    a: "Because they're the slow part. Searching, scanning and weighing are what make most people stop tracking after a few weeks. Leaving them out is the whole idea.",
+    a: "Because they're the slow, fiddly part, and they nudge you towards a precision you don't need. Leaving them out is the whole idea.",
   },
   {
     q: 'Do I have to track calories and protein?',
@@ -50,7 +67,7 @@ const faqs = [
     <div class="reveal divide-y divide-line border-y border-line">
       {
         faqs.map((item) => (
-          <details class="faq group">
+          <details class="faq group" id={item.id}>
             <summary class="flex items-center justify-between gap-6 py-6 text-lg font-medium sm:text-xl">
               {item.q}
               <span class="faq-icon grid size-9 shrink-0 place-items-center rounded-full bg-surface transition-transform duration-300">
@@ -66,3 +83,17 @@ const faqs = [
     </div>
   </div>
 </section>
+
+<script>
+  // A link straight to a question, like the note the "Keep count" section points to, opens its answer too:
+  // on arrival, and on every click, since clicking the same link again doesn't change the hash.
+  const open = (id: string) => {
+    const target = id && document.getElementById(id);
+    if (target instanceof HTMLDetailsElement) target.open = true;
+  };
+  open(location.hash.slice(1));
+  document.addEventListener('click', (event) => {
+    const link = (event.target as Element | null)?.closest?.('a[href^="#"]');
+    if (link) open(link.getAttribute('href')!.slice(1));
+  });
+</script>
