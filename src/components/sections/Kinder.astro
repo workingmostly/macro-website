@@ -6,16 +6,12 @@ const GOAL = 2200;
 const LOW = GOAL * 0.9;
 const HIGH = GOAL * 1.1;
 
-// "About right is the aim": a target with a loose grouping of hits inside a soft close-enough ring, none dead centre.
-const HITS = [
-  [16, -11],
-  [-13, 9],
-  [5, 23],
-  [-21, -15],
-  [26, 12],
-  [-3, -27],
-  [11, 4],
-  [-25, 20],
+// "About right is the aim": four exact counts of the same dinner, scattered and faint, around the one that matters.
+const EXACT = [
+  { kcal: 612, at: 'top-2.5 left-7 -rotate-6 text-[26px] text-ink/20' },
+  { kcal: 587, at: 'top-[18px] right-[34px] rotate-3 text-[22px] text-ink/15' },
+  { kcal: 596, at: 'bottom-3.5 left-11 rotate-2 text-[22px] text-ink/15' },
+  { kcal: 604, at: 'right-[18px] bottom-[22px] -rotate-3 text-[26px] text-ink/20' },
 ];
 
 // "A bit over still counts": a day at 2,350 on the default goal, inside the 10% band, on a 1,700–2,700 track.
@@ -58,14 +54,16 @@ const left = MEAL.calories - 4 * MEAL.protein;
       title="About right is the aim."
       body="There's nothing to weigh or look up. Drag to roughly how big the meal was. The drag is finest where most meals land, so a sensible guess takes seconds."
     >
-      <svg width="196" height="196" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-        <circle cx="100" cy="100" r="96" fill="#fff"></circle>
-        <circle cx="100" cy="100" r="72" stroke="#e5e5ea" stroke-width="1.5"></circle>
-        <circle cx="100" cy="100" r="40" fill="#34c759" fill-opacity="0.12"></circle>
-        <circle cx="100" cy="100" r="40" stroke="#34c759" stroke-opacity="0.45" stroke-width="1.5" stroke-dasharray="4 4"></circle>
-        <circle cx="100" cy="100" r="3.5" fill="#c7c7cc"></circle>
-        {HITS.map(([dx, dy]) => <circle cx={100 + dx} cy={100 + dy} r="6.5" fill="#34c759" stroke="#fff" stroke-width="2.5" />)}
-      </svg>
+      <div
+        class="about-right relative h-[190px] w-full max-w-[300px] font-display font-semibold tracking-[-0.03em]"
+        role="img"
+        aria-label="612, 587, 596 and 604 calories: all of them are about 600."
+      >
+        {EXACT.map(({ kcal, at }, i) => <span class:list={['exact absolute', at]} style={`--i:${i}`}>{kcal}</span>)}
+        <span class="round absolute inset-0 grid place-items-center text-[64px] leading-none tracking-[-0.04em]">
+          <span><span class="text-ios-green">≈</span>600</span>
+        </span>
+      </div>
     </FeatureCard>
 
     <FeatureCard
