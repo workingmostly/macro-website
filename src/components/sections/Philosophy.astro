@@ -5,6 +5,9 @@ import { FULL_STOP, PERFECT, PERFECT_LENGTH, RIGHT_EDGE, ROUGH, ROUGH_LENGTH } f
 // drawn bigger). The loose line runs on past the column to the right until the section's rounded card clips it.
 const LEFT = 96;
 const span = (RIGHT_EDGE - LEFT) / 1000;
+// The tallest loops reach y 662 and the neat line's base sits at 1052, so the frame takes in both, strokes and all.
+const TOP = 650;
+const HEIGHT = 410;
 // Both lines write at the same pace, about a loop every 0.17 s: 7 loops for the neat one, 40 for the loose one.
 const PER_LOOP = 0.168;
 ---
@@ -23,9 +26,9 @@ const PER_LOOP = 0.168;
     <!-- Two lines of handwriting: the neat one stops at a full stop, the loose one keeps going off the card. -->
     <figure class="why-lines reveal mx-auto mt-14 max-w-4xl sm:mt-20">
       <svg
-        class="block h-auto w-[calc(var(--span)*150%)] max-w-none sm:w-[calc(var(--span)*100%)]"
+        class="block h-auto w-[calc(var(--span)*150%)] max-w-none overflow-visible sm:w-[calc(var(--span)*100%)]"
         style={`--span:${span}`}
-        viewBox={`${LEFT} 670 ${RIGHT_EDGE - LEFT} 390`}
+        viewBox={`${LEFT} ${TOP} ${RIGHT_EDGE - LEFT} ${HEIGHT}`}
         fill="none"
         role="img"
         aria-label="Two hand-drawn lines of loops, like joined-up handwriting. A loose green line, every loop a little different, keeps going off the edge. Below it, a neat grey line of seven identical loops stops with a full stop."

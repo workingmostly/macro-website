@@ -27,7 +27,7 @@
 
   --radius-card: 2.5rem;
 
-  --animate-marquee: marquee 130s linear infinite;
+  --animate-marquee: marquee 142s linear infinite;
   @keyframes marquee {
     to {
       transform: translateX(-50%);
