@@ -5,7 +5,7 @@ Six 4:5 slides (1080 × 1350), in posting order. They're plain SVGs styled like 
 | # | File | Says |
 | - | ---- | ---- |
 | 1 | `01-cover.svg` | Count calories, not crumbs. Two phones mid-drag: 500 kcal, then 35 g of protein. |
-| 2 | `02-keep-count.svg` | Keep count without it taking over. Nothing to weigh, a bit over still counts, nudges not nagging, stays on your iPhone, beside the app's week chart. |
+| 2 | `02-keep-count.svg` | Keep count without it taking over. Nothing to weigh, a bit over still counts, we do the maths, stays on your iPhone, beside the app's week chart. |
 | 3 | `03-roughly-right.svg` | Roughly right every day beats perfectly right for a week. Two lines of handwriting: a loose one that keeps going, and a neat one that stops at a full stop. Close enough, kept up. |
 | 4 | `04-fourteen-steps.svg` / `.mp4` | A typical tracker: 14 steps. A homemade spag bol for four, logged ingredient by ingredient. The video plays the site's typical tracker through every step (21 s). |
 | 5 | `05-two-steps.svg` / `.mp4` | Macro: 2 steps. The same spag bol, dragged to 500 kcal and 35 g of protein. The video plays both drags and lands on Today (6 s). |
@@ -44,7 +44,7 @@ Colours are the site's: ink `#0a0a0a`, muted `#6e6e73`, faint `#a1a1a6`, surface
 ## Alt text
 
 1. Two iPhones mid-meal: dinner dragged to 500 calories on one, 35 grams of protein on the other. "Count calories, not crumbs."
-2. "Keep count without it taking over." Nothing to weigh, a bit over still counts, nudges not nagging, stays on your iPhone. Beside it, Macro's week chart: on track, 5 of 6 days this week hit both goals.
+2. "Keep count without it taking over." Nothing to weigh, a bit over still counts, we do the maths, stays on your iPhone. Beside it, Macro's week chart: on track, 5 of 6 days this week hit both goals.
 3. "Roughly right every day beats perfectly right for a week." Two hand-drawn lines of loops, like joined-up handwriting. A loose green line, every loop a little different, keeps going past the edge; a neat grey line of seven identical loops stops with a full stop. "Close enough, kept up."
 4. "14 steps." A typical tracker logging one homemade spag bol for four: create a recipe, then search, pick a match and enter grams for each ingredient, set servings, and log. The phone shows a long list of near-identical beef mince results.
 5. "2 steps." The same spag bol in Macro: drag to 500 calories, drag to 35 grams of protein, done. The phone shows the day with dinner logged.
