@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1350" viewBox="0 0 1080 1350" fill="none">
+<title>Keep count without it taking over. With room for real life.</title>
+<defs>
+<clipPath id="slide-clip"><rect width="1080" height="1350" fill="#fff"/></clipPath>
+</defs>
+<rect id="background" width="1080" height="1350" fill="#e3f7e8"/>
+<g id="slide-content" clip-path="url(#slide-clip)">
+<path id="margin" d="M205 -20C209 300 202 700 207 1000C209 1180 204 1300 206 1370" stroke="#34c759" stroke-width="5.5" stroke-linecap="round"/><text id="eyebrow" fill="#248a3d" font-family="Inter" font-size="26" font-weight="600" letter-spacing="0.14em" xml:space="preserve"><tspan x="268" y="140">BALANCE</tspan></text><text id="headline" fill="#0a0a0a" font-family="Inter Tight" font-size="157" font-weight="600" letter-spacing="-0.04em" xml:space="preserve"><tspan x="268" y="304.14">Keep count</tspan><tspan x="268" y="458">without it</tspan><tspan x="268" y="611.86">taking over.</tspan></text><text id="support" fill="#248a3d" font-family="Inter Tight" font-size="107" font-weight="600" letter-spacing="-0.04em" xml:space="preserve"><tspan x="268" y="784.19">With room</tspan><tspan x="268" y="893.33">for real life.</tspan></text><path id="tally-1" d="M62 186L66.5 280M84 192L81 274M106 188L112 282M128 194L126.5 276M48 260.88L144 205.2" stroke="#34c759" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path id="tally-2" d="M62 696.4L66.5 790.4M84 702.4L81 784.4M106 698.4L112 792.4M128 704.4L126.5 786.4M48 771.28L144 715.6" stroke="#34c759" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path id="tally-3" d="M84 1130L88.5 1224M106 1136L103 1218" stroke="#34c759" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>

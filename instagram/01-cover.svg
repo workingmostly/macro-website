@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1350" viewBox="0 0 1080 1350" fill="none">
-<title>The fastest way to count calories. Two drags and you’re done.</title>
+<title>Every meal, not every gram. Two drags and you’re done.</title>
 <defs>
-<radialGradient id="calories-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(330 1067.67) scale(430 420)"><stop stop-color="#34c759" stop-opacity="0.3"/><stop offset="1" stop-color="#34c759" stop-opacity="0"/></radialGradient>
-<radialGradient id="protein-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(800 847.67) scale(360 380)"><stop stop-color="#007aff" stop-opacity="0.22"/><stop offset="1" stop-color="#007aff" stop-opacity="0"/></radialGradient>
+<radialGradient id="calories-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(330 1079.67) scale(430 420)"><stop stop-color="#34c759" stop-opacity="0.3"/><stop offset="1" stop-color="#34c759" stop-opacity="0"/></radialGradient>
+<radialGradient id="protein-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(800 859.67) scale(360 380)"><stop stop-color="#007aff" stop-opacity="0.22"/><stop offset="1" stop-color="#007aff" stop-opacity="0"/></radialGradient>
 <clipPath id="protein-phone-screen-clip"><rect x="12" y="12" width="393" height="852" rx="56" fill="#fff"/></clipPath>
 <linearGradient id="protein-phone-trail-gradient" x1="0" y1="611" x2="0" y2="791" gradientUnits="userSpaceOnUse"><stop stop-color="#007aff" stop-opacity="0.45"/><stop offset="1" stop-color="#007aff" stop-opacity="0"/></linearGradient>
 <clipPath id="calories-phone-screen-clip"><rect x="12" y="12" width="393" height="852" rx="56" fill="#fff"/></clipPath>
@@ -11,7 +11,7 @@
 </defs>
 <rect id="background" width="1080" height="1350" fill="#f2f2f7"/>
 <g id="slide-content" clip-path="url(#slide-clip)">
-<text id="headline" fill="#0a0a0a" font-family="Inter Tight" font-size="124" font-weight="600" letter-spacing="-0.04em" xml:space="preserve"><tspan x="96" y="240.15">The fastest way</tspan><tspan x="96" y="361.67">to count calories.</tspan></text><text id="support" fill="#6e6e73" font-family="Inter" font-size="40" font-weight="400" xml:space="preserve"><tspan x="96" y="439.67">Two drags and you’re done.</tspan></text><ellipse id="calories-glow" cx="330" cy="1067.67" rx="430" ry="420" fill="url(#calories-glow-gradient)"/><ellipse id="protein-glow" cx="800" cy="847.67" rx="360" ry="380" fill="url(#protein-glow-gradient)"/><g id="protein-phone" transform="translate(776 1096.82) rotate(5) scale(1.0071942446043165) translate(-208.5 -438)">
+<text id="headline" fill="#0a0a0a" font-family="Inter Tight" font-size="124" font-weight="600" letter-spacing="-0.04em" xml:space="preserve"><tspan x="96" y="240.15">Every meal,</tspan><tspan x="96" y="361.67">not every gram.</tspan></text><text id="support" fill="#6e6e73" font-family="Inter" font-size="40" font-weight="400" xml:space="preserve"><tspan x="96" y="451.67">Two drags and you’re done.</tspan></text><ellipse id="calories-glow" cx="330" cy="1079.67" rx="430" ry="420" fill="url(#calories-glow-gradient)"/><ellipse id="protein-glow" cx="800" cy="859.67" rx="360" ry="380" fill="url(#protein-glow-gradient)"/><g id="protein-phone" transform="translate(776 1108.82) rotate(5) scale(1.0071942446043165) translate(-208.5 -438)">
 
 <rect id="protein-phone-bezel-outer" x="-3.5" y="-3.5" width="424" height="883" rx="71.5" fill="#b4b4ba"/>
 <rect id="protein-phone-bezel" x="-2" y="-2" width="421" height="880" rx="70" fill="#d6d6db"/>
@@ -28,7 +28,7 @@
 <rect id="protein-phone-home-indicator" x="127.5" y="839" width="138" height="5" rx="2.5" fill="#000"/>
 </g></g>
 
-</g><g id="calories-phone" transform="translate(342 1139.87) rotate(-4) scale(1.3429256594724222) translate(-208.5 -438)">
+</g><g id="calories-phone" transform="translate(342 1151.87) rotate(-4) scale(1.3429256594724222) translate(-208.5 -438)">
 <rect id="calories-phone-outline" x="-7.22" y="-7.22" width="431.45" height="890.45" rx="75.22" fill="#fff"/>
 <rect id="calories-phone-bezel-outer" x="-3.5" y="-3.5" width="424" height="883" rx="71.5" fill="#b4b4ba"/>
 <rect id="calories-phone-bezel" x="-2" y="-2" width="421" height="880" rx="70" fill="#d6d6db"/>
