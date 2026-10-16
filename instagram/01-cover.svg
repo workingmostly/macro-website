@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1350" viewBox="0 0 1080 1350" fill="none">
-<title>Every meal, not every gram. Two drags and you’re done.</title>
+<title>Food tracking, without the fixation. Two drags and you’re done.</title>
 <defs>
-<radialGradient id="calories-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(367 1079.67) scale(430 420)"><stop stop-color="#34c759" stop-opacity="0.3"/><stop offset="1" stop-color="#34c759" stop-opacity="0"/></radialGradient>
-<radialGradient id="protein-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(803 859.67) scale(360 380)"><stop stop-color="#007aff" stop-opacity="0.22"/><stop offset="1" stop-color="#007aff" stop-opacity="0"/></radialGradient>
+<radialGradient id="calories-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(385 1034.36) scale(400 400)"><stop stop-color="#34c759" stop-opacity="0.3"/><stop offset="1" stop-color="#34c759" stop-opacity="0"/></radialGradient>
+<radialGradient id="protein-glow-gradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(750 894.36) scale(330 360)"><stop stop-color="#007aff" stop-opacity="0.22"/><stop offset="1" stop-color="#007aff" stop-opacity="0"/></radialGradient>
 <clipPath id="protein-phone-screen-clip"><rect x="12" y="12" width="393" height="852" rx="56" fill="#fff"/></clipPath>
 <linearGradient id="protein-phone-trail-gradient" x1="0" y1="611" x2="0" y2="791" gradientUnits="userSpaceOnUse"><stop stop-color="#007aff" stop-opacity="0.45"/><stop offset="1" stop-color="#007aff" stop-opacity="0"/></linearGradient>
 <clipPath id="calories-phone-screen-clip"><rect x="12" y="12" width="393" height="852" rx="56" fill="#fff"/></clipPath>
@@ -11,7 +11,7 @@
 </defs>
 <rect id="background" width="1080" height="1350" fill="#f2f2f7"/>
 <g id="slide-content" clip-path="url(#slide-clip)">
-<text id="headline" fill="#0a0a0a" font-family="Inter Tight" font-size="124" font-weight="600" letter-spacing="-0.04em" xml:space="preserve"><tspan x="96" y="240.15">Every meal,</tspan><tspan x="96" y="361.67">not every gram.</tspan></text><text id="support" fill="#6e6e73" font-family="Inter" font-size="40" font-weight="400" xml:space="preserve"><tspan x="96" y="451.67">Two drags and you’re done.</tspan></text><ellipse id="calories-glow" cx="367" cy="1079.67" rx="430" ry="420" fill="url(#calories-glow-gradient)"/><ellipse id="protein-glow" cx="803" cy="859.67" rx="360" ry="380" fill="url(#protein-glow-gradient)"/><g id="protein-phone" transform="translate(779 1108.82) rotate(5) scale(1.0071942446043165) translate(-208.5 -438)">
+<g id="food"><text id="emoji" x="962" y="217.52" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="104" text-anchor="middle" transform="rotate(14 962 178)">🍕</text><text id="emoji-2" x="868" y="469.16" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="82" text-anchor="middle" transform="rotate(-10 868 438)">🥐</text><text id="emoji-3" x="120" y="674.96" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="92" text-anchor="middle" transform="rotate(-12 120 640)">🥑</text><text id="emoji-4" x="968" y="642" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="100" text-anchor="middle" transform="rotate(10 968 604)">🍝</text><text id="emoji-5" x="70" y="966.48" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="96" text-anchor="middle" transform="rotate(18 70 930)">🍩</text><text id="emoji-6" x="1010" y="943" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="100" text-anchor="middle" transform="rotate(-8 1010 905)">🥗</text><text id="emoji-7" x="120" y="1249.52" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="104" text-anchor="middle" transform="rotate(-22 120 1210)">🍌</text><text id="emoji-8" x="990" y="1204.96" fill="#000" font-family="Apple Color Emoji, Noto Color Emoji, sans-serif" font-size="92" text-anchor="middle" transform="rotate(12 990 1170)">🍣</text></g><text id="headline" fill="#0a0a0a" font-family="Inter Tight" font-size="108" font-weight="600" letter-spacing="-0.04em" xml:space="preserve"><tspan x="96" y="228.52">Food tracking,</tspan><tspan x="96" y="334.36">without the fixation.</tspan></text><text id="support" fill="#6e6e73" font-family="Inter" font-size="40" font-weight="400" xml:space="preserve"><tspan x="96" y="416.36">Two drags and you’re done.</tspan></text><ellipse id="calories-glow" cx="385" cy="1034.36" rx="400" ry="400" fill="url(#calories-glow-gradient)"/><ellipse id="protein-glow" cx="750" cy="894.36" rx="330" ry="360" fill="url(#protein-glow-gradient)"/><g id="protein-phone" transform="translate(750 1083.49) rotate(6) scale(0.9112709832134293) translate(-208.5 -438)">
 
 <rect id="protein-phone-bezel-outer" x="-3.5" y="-3.5" width="424" height="883" rx="71.5" fill="#b4b4ba"/>
 <rect id="protein-phone-bezel" x="-2" y="-2" width="421" height="880" rx="70" fill="#d6d6db"/>
@@ -28,8 +28,8 @@
 <rect id="protein-phone-home-indicator" x="127.5" y="839" width="138" height="5" rx="2.5" fill="#000"/>
 </g></g>
 
-</g><g id="calories-phone" transform="translate(379 1151.87) rotate(-4) scale(1.3429256594724222) translate(-208.5 -438)">
-<rect id="calories-phone-outline" x="-7.22" y="-7.22" width="431.45" height="890.45" rx="75.22" fill="#fff"/>
+</g><g id="calories-phone" transform="translate(385 1028.03) rotate(-4) scale(1.1270983213429258) translate(-208.5 -438)">
+<rect id="calories-phone-outline" x="-7.94" y="-7.94" width="432.87" height="891.87" rx="75.94" fill="#fff"/>
 <rect id="calories-phone-bezel-outer" x="-3.5" y="-3.5" width="424" height="883" rx="71.5" fill="#b4b4ba"/>
 <rect id="calories-phone-bezel" x="-2" y="-2" width="421" height="880" rx="70" fill="#d6d6db"/>
 <rect id="calories-phone-body" width="417" height="876" rx="68" fill="#0c0c0d"/>
