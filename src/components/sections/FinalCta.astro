@@ -25,13 +25,13 @@ import { site } from '../../config';
 
     <div class="relative mx-auto mt-20 flex h-[300px] max-w-4xl items-start justify-center sm:h-[400px]">
       <Phone className="absolute top-14 hidden -translate-x-[78%] -rotate-[8deg] brightness-[0.8] [--s:0.6] sm:block">
-        <InputScreen field="protein" value={42} stepIndex={1} label="Dinner" time="19:12" />
+        <InputScreen field="calories" value={640} stepIndex={0} label="Dinner" time="19:12" />
       </Phone>
       <Phone className="absolute top-14 hidden translate-x-[78%] rotate-[8deg] brightness-[0.8] [--s:0.6] sm:block">
-        <TodayScreen meals={SAMPLE_DAY} />
+        <InputScreen field="protein" value={42} stepIndex={1} label="Dinner" time="19:12" />
       </Phone>
       <Phone className="relative [--s:0.62] sm:[--s:0.66]">
-        <InputScreen field="calories" value={640} stepIndex={0} label="Dinner" time="19:12" />
+        <TodayScreen meals={SAMPLE_DAY} />
       </Phone>
     </div>
   </div>
