@@ -4,12 +4,12 @@ Six 4:5 slides (1080 × 1350), in posting order. They're plain SVGs styled like 
 
 | # | File | Says |
 | - | ---- | ---- |
-| 1 | `01-cover.svg` | Count calories, not crumbs. Two phones mid-drag: 500 kcal, then 35 g of protein. |
-| 2 | `02-keep-count.svg` | Keep count without it taking over. The site's four Balance cards: about right is the aim (≈600 among exact counts), a bit over still counts (2,350 inside the 10% range), room for the weekend (a week that averages 2,180), and log as little as you like (500 kcal and 35 g, carbs and fat estimated). |
+| 1 | `01-cover.svg` | The fastest way to count calories. Two drags and you're done. Two phones mid-drag: 500 kcal, then 35 g of protein. |
+| 2 | `02-keep-count.svg` | Keep count without it taking over. The headline is the picture: set big, with the word "count" kept small in a green pill. With room for real life. |
 | 3 | `03-roughly-right.svg` | Roughly right every day beats perfectly right for a week. Two lines of handwriting: a loose one that keeps going, and a neat one that stops at a full stop. Close enough, kept up. |
 | 4 | `04-fourteen-steps.svg` / `.mp4` | A typical tracker: 14 steps. A homemade spag bol for four, logged ingredient by ingredient. The video plays the site's typical tracker through every step (21 s). |
 | 5 | `05-two-steps.svg` / `.mp4` | Macro: 2 steps. The same spag bol, dragged to 500 kcal and 35 g of protein, then we do the rest: carbs and fat, estimated. The video plays both drags and lands on Today with carbs and fat filled in (6 s). |
-| 6 | `06-join-the-beta.svg` | Track your food without the faff. Free forever, no ads, no trackers, no account. Join the beta. The only slide with the app icon. |
+| 6 | `06-join-the-beta.svg` | Track your food without the faff. Free forever, no ads, no trackers, no account. Join the beta, link in bio, over the site's closing phones. The only slide with the app icon. |
 
 `previews/` has a PNG of each slide as committed, for a quick look without opening Figma. They won't follow your Figma edits, so export fresh ones from there when you post.
 
@@ -29,7 +29,7 @@ Colours are the site's: ink `#0a0a0a`, muted `#6e6e73`, faint `#a1a1a6`, surface
 
 ## Caption
 
-> Count calories, not crumbs.
+> The fastest way to count calories.
 >
 > Macro is a calorie and protein tracker for iPhone with nothing to scan, search, weigh or photograph. Drag to roughly how many calories, drag to roughly how much protein, and Macro does the rest, working out carbs and fat for you.
 >
@@ -43,9 +43,9 @@ Colours are the site's: ink `#0a0a0a`, muted `#6e6e73`, faint `#a1a1a6`, surface
 
 ## Alt text
 
-1. Two iPhones mid-meal: dinner dragged to 500 calories on one, 35 grams of protein on the other. "Count calories, not crumbs."
-2. "Keep count without it taking over. A sensible estimate, kept up, with room for real life." Four cards. About right is the aim: a bold "≈600" among faint exact counts of 612, 587, 596 and 604. A bit over still counts: today at 2,350 calories on a 2,200 goal, inside the range from 1,980 to 2,420. Room for the weekend: a week of bars, under on Monday and over on Saturday, averaging 2,180. Log as little as you like: 500 calories and 35 grams of protein, with carbs (54 g) and fat (16 g) estimated.
+1. "The fastest way to count calories. Two drags and you're done." Two iPhones mid-drag: dinner dragged to 500 calories on one, 35 grams of protein on the other.
+2. "Keep count without it taking over." in big black type, with the word "count" small, in a green pill. Underneath: "With room for real life."
 3. "Roughly right every day beats perfectly right for a week." Two hand-drawn lines of loops, like joined-up handwriting. A loose green line, every loop a little different, keeps going past the edge; a neat grey line of seven identical loops stops with a full stop. "Close enough, kept up."
 4. "14 steps." A typical tracker logging one homemade spag bol for four: create a recipe, then search, pick a match and enter grams for each ingredient, set servings, and log. The phone shows a long list of near-identical beef mince results.
 5. "2 steps." The same spag bol in Macro: drag to 500 calories, drag to 35 grams of protein, and we do the rest: carbs and fat, estimated. The phone shows the day with dinner logged and carbs and fat filled in.
-6. The Macro app icon. "Track your food without the faff." Free forever, no ads, no trackers, no account. Join the beta: public beta on TestFlight, link in bio.
+6. The Macro app icon. "Track your food without the faff." Free forever, no ads, no trackers, no account. A "Join the beta" button, link in bio. Below, three iPhones: calories in front, protein and the day's meals tucked behind.
