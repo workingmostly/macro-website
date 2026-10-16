@@ -25,7 +25,7 @@ Six 4:5 slides (1080 × 1350), in posting order. They're plain SVGs styled like 
 
 The MP4s are H.264, 1080 × 1350 at 30 fps with no sound. They don't change when you edit the SVGs in Figma, so if you change slide 4 or 5 there, the video needs remaking to match.
 
-Colours are the site's: ink `#0a0a0a`, muted `#6e6e73`, faint `#a1a1a6`, surface `#f2f2f7`, night `#0b0b0c`, green `#34c759`, blue `#007aff`, orange `#ff9500`, amber `#f2a144`, and the tints `#e3f7e8`, `#dbecff` and `#ffefd9`.
+Colours are the site's: ink `#0a0a0a`, muted `#6e6e73`, faint `#a1a1a6`, surface `#f2f2f7`, night `#0b0b0c`, green `#34c759`, dark green `#248a3d`, blue `#007aff`, orange `#ff9500`, and the tints `#e3f7e8`, `#dbecff` and `#ffefd9`.
 
 ## Caption
 
