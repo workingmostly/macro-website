@@ -5,7 +5,7 @@ Six 4:5 slides (1080 × 1350), in posting order. They're plain SVGs styled like 
 | # | File | Says |
 | - | ---- | ---- |
 | 1 | `01-cover.svg` | Every meal, not every gram. Two drags and you're done. Two phones mid-drag: 500 kcal, then 35 g of protein. |
-| 2 | `02-roughly-right.svg` | Why it works. Roughly right every day beats perfectly right for a week, in two halves, each with its own line of handwriting: a loose green line that keeps going under the first, and seven neat grey loops that stop at a full stop under the second. On a calm blue. |
+| 2 | `02-roughly-right.svg` | Why it works. Roughly right every day beats perfectly right for a week. Two lines of handwriting: a loose green one that keeps going, and a neat grey one that stops at a full stop. Close enough, kept up. On a calm blue. |
 | 3 | `03-keep-count.svg` | Balance. Keep count without it taking over. With room for real life. A hand-drawn green margin down the left, with a few tally marks kept small in it, and the page left to the message. |
 | 4 | `04-fourteen-steps.svg` / `.mp4` | A typical tracker: 14 steps. One homemade spag bol for four. Laid out like the site's comparison cards: a progress bar with a segment per step, the current step's caption, and the phone. The still shows step 3 of 14; the video steps through all fourteen, one caption at a time (21 s). |
 | 5 | `05-two-steps.svg` / `.mp4` | Macro: 2 steps. The same spag bol: drag to 500 kcal, drag to 35 g of protein, then we do the rest, with carbs and fat estimated on Today. The still shows it done; the video plays both drags, the glow turning from green to blue, and lands on Today (6 s). |
@@ -44,7 +44,7 @@ Colours are the site's: ink `#0a0a0a`, muted `#6e6e73`, faint `#a1a1a6`, surface
 ## Alt text
 
 1. "Every meal, not every gram. Two drags and you're done." Two iPhones mid-drag: dinner dragged to 500 calories on one, 35 grams of protein on the other.
-2. "Roughly right every day beats perfectly right for a week." The sentence in two halves. Under "Roughly right every day beats", a loose green hand-drawn line of loops, every loop a little different, runs on past the edge. Under "perfectly right for a week.", seven neat grey loops stop at a full stop.
+2. "Roughly right every day beats perfectly right for a week." Two hand-drawn lines of loops, like joined-up handwriting. A loose green line, every loop a little different, keeps going past the edge; a neat grey line of seven identical loops stops with a full stop. "Close enough, kept up."
 3. "Keep count without it taking over. With room for real life." Down the left, a hand-drawn green margin line, with a few tally marks kept small beside it; the rest of the page is open.
 4. "14 steps." A typical tracker logging one homemade spag bol for four. A progress bar of fourteen segments, on step 3: "Pick the right match". The phone shows a long list of near-identical beef mince results.
 5. "2 steps." The same spag bol in Macro: drag to 500 calories, drag to 35 grams of protein, done. "We do the rest." The phone shows the day with carbs and fat estimated.
