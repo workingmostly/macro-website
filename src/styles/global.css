@@ -136,11 +136,7 @@
       translate: 0 calc(16px * (1 - var(--lift)));
     }
   }
-  .nav-bar::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    inset: 0;
+  .nav-bar {
     background: rgb(255 255 255 / calc(0.8 * var(--lift)));
     box-shadow:
       0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--lift))),
@@ -152,22 +148,20 @@
 
   /* The nav's button, shown only while no other "Join the beta" button is on screen. Showing it moves three things
      together, over the same 450ms:
-     - Its slot opens from nothing. Until then the button sits parked just past the bar's right edge, where .nav-clip
-       cuts it off, so it slides in from the right.
+     - Its slot opens from nothing. Until then the button sits parked just past the bar's right edge, where the bar's
+       overflow: clip cuts it off, so it slides in from the right.
      - The spare space shifts from all being before the links (in the logo's group, .nav-start) to being split
        evenly either side (with the button's group, .nav-end), and the links lose their right margin. So they move
        from the right, 32px in (where the button's label will end), to the centre. The two groups' flex-grow always
        add up to 1, so the share moves in step with the button.
      - The bar's right corners go from matching the left ones (24px, around the logo) to matching the button (32px,
        its 24px radius plus the 8px gap), so the curves stay concentric.
-     The hidden state only applies on pages that have another button to defer to. Nothing animates until the script
-     has set the starting state (data-ready), so the button never slides in as the page loads. */
-  .nav-bar::before,
-  .nav-clip {
-    border-radius: 24px 32px 32px 24px;
-  }
-  .nav-clip {
+     The hidden state only applies on pages that have another button to defer to, and never while the button has
+     keyboard focus, so focus can't be left on a button that's sliding away. Nothing animates until the script has set
+     the starting state (data-ready), so the button never slides in as the page loads. */
+  .nav-bar {
     overflow: clip;
+    border-radius: 24px 32px 32px 24px;
   }
   .nav-start,
   .nav-end {
@@ -185,28 +179,26 @@
     justify-self: start;
   }
   .js .nav[data-ready] {
-    .nav-bar::before,
-    .nav-clip {
+    .nav-bar {
       transition: border-radius 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
-    }
-    .nav-links {
-      transition: margin-right 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
     }
     .nav-start,
     .nav-end {
       transition: flex-grow 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
     }
+    .nav-links {
+      transition: margin-right 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    /* visibility holds at visible until a hide finishes, and turns visible as soon as a show starts */
     .nav-cta-slot {
-      transition: grid-template-columns 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+      transition:
+        grid-template-columns 450ms cubic-bezier(0.2, 0.7, 0.2, 1),
+        visibility 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
     }
   }
-  .js body:has([data-cta]) .nav:not([data-show-cta]) {
-    .nav-bar::before,
-    .nav-clip {
+  .js body:has([data-cta]) .nav:not([data-show-cta], :has(.nav-cta:focus-visible)) {
+    .nav-bar {
       border-radius: 24px;
-    }
-    .nav-links {
-      margin-right: 24px;
     }
     .nav-start {
       flex-grow: 1;
@@ -214,16 +206,12 @@
     .nav-end {
       flex-grow: 0;
     }
-    .nav-cta-slot {
-      grid-template-columns: minmax(0, 0fr);
+    .nav-links {
+      margin-right: 24px;
     }
-    .nav-cta {
+    .nav-cta-slot {
       visibility: hidden;
-      transition:
-        background-color 160ms ease,
-        transform 160ms ease,
-        box-shadow 160ms ease,
-        visibility 0s 450ms;
+      grid-template-columns: minmax(0, 0fr);
     }
   }
 
