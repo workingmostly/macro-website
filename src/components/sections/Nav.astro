@@ -11,30 +11,33 @@ const links = [
 ---
 
 <!-- On mobile it sits above the hero card. From sm up it sits inset inside the card, and from lg up (where the hero
-     text is left-aligned) the logo and links line up with the hero's edges. At the top it lies flat on the page, with
-     no bar behind it; as you scroll it lifts off into a floating bar (see .nav in global.css). Its button only shows
-     while no other "Join the beta" button is on screen, sliding in from the right and pushing the links along. -->
+     text is left-aligned) the logo lines up with the headline. At the top it lies flat on the page, with no bar behind
+     it; as you scroll it lifts off into a floating bar (see .nav in global.css). Its button only shows while no other
+     "Join the beta" button is on screen. Until then the links sit on the right; when it slides in from the right they
+     move to the centre. The logo and the button each sit in a group that takes an equal share of the spare space,
+     which is what centres the links between them. -->
 <header data-nav class="nav fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-4">
   <div class="mx-auto max-w-6xl lg:px-[26px]">
     <nav class="nav-bar relative z-0" aria-label="Main">
-      <div class="nav-clip flex h-16 items-center justify-between pr-2 pl-3.5">
-        <a href="/" data-home class="flex items-center gap-2.5 rounded-full pr-2" aria-label="Macro home">
-          <img src="/icon.png" alt="" width="36" height="36" class="size-9 rounded-[10px]" />
-          <span class="font-display text-[22px] font-semibold tracking-[-0.035em]">Macro</span>
-        </a>
+      <div class="nav-clip flex h-16 items-center pr-2 pl-3.5">
+        <div class="nav-start flex">
+          <a href="/" data-home class="flex items-center gap-2.5 rounded-full pr-2" aria-label="Macro home">
+            <img src="/icon.png" alt="" width="36" height="36" class="size-9 rounded-[10px]" />
+            <span class="font-display text-[22px] font-semibold tracking-[-0.035em]">Macro</span>
+          </a>
+        </div>
 
-        <div class="flex items-center">
-          <!-- mr-1.5 on top of the bar's pr-2 leaves the links as far from the right edge as the logo is from the left -->
-          <div class="mr-1.5 hidden items-center gap-6 text-[15px] text-ink/70 md:flex lg:gap-9">
-            {
-              links.map((link) => (
-                <a href={link.href} class="transition-colors hover:text-ink">
-                  {link.label}
-                </a>
-              ))
-            }
-          </div>
+        <div class="nav-links hidden shrink-0 items-center gap-6 text-[15px] whitespace-nowrap text-ink/70 md:flex lg:gap-9">
+          {
+            links.map((link) => (
+              <a href={link.href} class="transition-colors hover:text-ink">
+                {link.label}
+              </a>
+            ))
+          }
+        </div>
 
+        <div class="nav-end flex justify-end">
           <div class="nav-cta-slot">
             <a
               href={site.betaUrl}
@@ -68,24 +71,27 @@ const links = [
 
     // Every other "Join the beta" button on the page is marked data-cta. The nav's own one shows only while none of
     // them is on screen, so there's never more than one asking at a time. One that's slid up under the nav counts as
-    // gone. Pages without one (the privacy policy) always show it.
-    const ctas = document.querySelectorAll('[data-cta]');
-    if (ctas.length === 0) {
-      header.toggleAttribute('data-show-cta', true);
-    } else {
-      const onScreen = new Set<Element>();
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) onScreen.add(entry.target);
-            else onScreen.delete(entry.target);
-          }
-          header.toggleAttribute('data-show-cta', onScreen.size === 0);
-        },
-        { rootMargin: '-80px 0px 0px 0px' },
-      );
-      ctas.forEach((el) => io.observe(el));
-    }
+    // gone. On pages without one (the privacy policy) the CSS never hides it, so there's nothing to watch.
+    const onScreen = new Set<Element>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) onScreen.add(entry.target);
+          else onScreen.delete(entry.target);
+        }
+        header.toggleAttribute('data-show-cta', onScreen.size === 0);
+
+        // The first call just sets where the page starts (say, opened partway down, or on a screen too short to show
+        // the hero's button), so that lands instantly. Reading offsetWidth applies it before data-ready switches the
+        // transitions on; only changes after that slide.
+        if (!header.hasAttribute('data-ready')) {
+          void header.offsetWidth;
+          header.toggleAttribute('data-ready', true);
+        }
+      },
+      { rootMargin: '-80px 0px 0px 0px' },
+    );
+    document.querySelectorAll('[data-cta]').forEach((el) => io.observe(el));
   }
 
   // On the home page the logo scrolls back to the top rather than reloading, like the section links. Elsewhere it's

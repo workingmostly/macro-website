@@ -150,11 +150,18 @@
     backdrop-filter: blur(calc(24px * var(--lift))) saturate(calc(1 + 0.5 * var(--lift)));
   }
 
-  /* The nav's button, shown only while no other "Join the beta" button is on screen. While it's hidden its slot is
-     squeezed to nothing, leaving the button (at its full width) parked just past the bar's right edge, where .nav-clip cuts it off.
-     Opening the slot slides it in from the right, pushing the links along in front of it. Meanwhile the bar's right
-     corners go from matching the left ones (24px, around the logo) to matching the button (32px, its 24px radius
-     plus the 8px gap), so the curves stay concentric. */
+  /* The nav's button, shown only while no other "Join the beta" button is on screen. Showing it moves three things
+     together, over the same 450ms:
+     - Its slot opens from nothing. Until then the button sits parked just past the bar's right edge, where .nav-clip
+       cuts it off, so it slides in from the right.
+     - The spare space shifts from all being before the links (in the logo's group, .nav-start) to being split
+       evenly either side (with the button's group, .nav-end), and the links lose their right margin. So they move
+       from the right, 32px in (where the button's label will end), to the centre. The two groups' flex-grow always
+       add up to 1, so the share moves in step with the button.
+     - The bar's right corners go from matching the left ones (24px, around the logo) to matching the button (32px,
+       its 24px radius plus the 8px gap), so the curves stay concentric.
+     The hidden state only applies on pages that have another button to defer to. Nothing animates until the script
+     has set the starting state (data-ready), so the button never slides in as the page loads. */
   .nav-bar::before,
   .nav-clip {
     border-radius: 24px 32px 32px 24px;
@@ -162,24 +169,50 @@
   .nav-clip {
     overflow: clip;
   }
+  .nav-start,
+  .nav-end {
+    flex: 0.5 1 0;
+  }
+  .nav-end {
+    min-width: max-content;
+  }
   .nav-cta-slot {
+    flex: none;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
   .nav-cta-slot > .nav-cta {
     justify-self: start;
   }
-  .js .nav-bar::before,
-  .js .nav-clip {
-    transition: border-radius 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  .js .nav[data-ready] {
+    .nav-bar::before,
+    .nav-clip {
+      transition: border-radius 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .nav-links {
+      transition: margin-right 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .nav-start,
+    .nav-end {
+      transition: flex-grow 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .nav-cta-slot {
+      transition: grid-template-columns 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
   }
-  .js .nav-cta-slot {
-    transition: grid-template-columns 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-  .js .nav:not([data-show-cta]) {
+  .js body:has([data-cta]) .nav:not([data-show-cta]) {
     .nav-bar::before,
     .nav-clip {
       border-radius: 24px;
+    }
+    .nav-links {
+      margin-right: 24px;
+    }
+    .nav-start {
+      flex-grow: 1;
+    }
+    .nav-end {
+      flex-grow: 0;
     }
     .nav-cta-slot {
       grid-template-columns: minmax(0, 0fr);
@@ -189,6 +222,7 @@
       transition:
         background-color 160ms ease,
         transform 160ms ease,
+        box-shadow 160ms ease,
         visibility 0s 450ms;
     }
   }
