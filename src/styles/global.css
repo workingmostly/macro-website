@@ -120,6 +120,59 @@
     background: #e8e8ed;
   }
 
+  /* The nav. --lift runs from 0, at the top of the page, to 1 once it's scrolled a little (set by the script in
+     Nav.astro). At 0 the nav lies flat on the page: no bar, no shadow, and from sm up it sits inside the hero card.
+     As it rises the frosted bar fades in behind it, its shadow grows and drops, and it drifts up to the top, so it
+     reads as lifting off the page. Without JS it just floats, as it always has. */
+  .nav {
+    --lift: 1;
+    @variant sm {
+      translate: 0 16px;
+    }
+  }
+  .js .nav {
+    --lift: 0;
+    @variant sm {
+      translate: 0 calc(16px * (1 - var(--lift)));
+    }
+  }
+  .nav-bar::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: 24px 32px 32px 24px;
+    background: rgb(255 255 255 / calc(0.8 * var(--lift)));
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / calc(0.06 * var(--lift))),
+      0 calc(1px * var(--lift)) calc(2px * var(--lift)) rgb(0 0 0 / calc(0.03 * var(--lift))),
+      0 calc(10px * var(--lift)) calc(32px * var(--lift)) rgb(0 0 0 / calc(0.08 * var(--lift)));
+    -webkit-backdrop-filter: blur(calc(24px * var(--lift))) saturate(calc(1 + 0.5 * var(--lift)));
+    backdrop-filter: blur(calc(24px * var(--lift))) saturate(calc(1 + 0.5 * var(--lift)));
+  }
+
+  /* The nav's button, shown only while no other "Join the beta" button is on screen. It keeps its space while hidden,
+     so the links don't shift when it arrives. */
+  .js .nav-cta {
+    transition:
+      background-color 160ms ease,
+      opacity 250ms ease,
+      filter 250ms ease,
+      transform 350ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .js .nav:not([data-show-cta]) .nav-cta {
+    visibility: hidden;
+    opacity: 0;
+    filter: blur(4px);
+    transform: scale(0.9);
+    transition:
+      background-color 160ms ease,
+      opacity 250ms ease,
+      filter 250ms ease,
+      transform 350ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      visibility 0s 350ms;
+  }
+
   /* Struck-through words in the "no" marquee */
   .strike {
     position: relative;

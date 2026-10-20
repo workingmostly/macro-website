@@ -10,40 +10,70 @@ const links = [
 ];
 ---
 
-<!-- On mobile it sits above the hero card. From sm up it sits inset inside the card on landing, then tucks up to the top once scrolling starts. -->
-<header
-  data-nav
-  class="fixed inset-x-0 top-3 z-50 px-3 transition-transform duration-300 ease-out sm:top-4 sm:translate-y-4 sm:px-4 sm:data-scrolled:translate-y-0"
->
-  <nav
-    class="mx-auto flex h-16 max-w-6xl items-center justify-between rounded-l-[24px] rounded-r-[32px] bg-white/80 pr-2 pl-3.5 shadow-[0_8px_30px_rgb(0_0_0/0.07)] ring-1 ring-black/[0.06] backdrop-blur-xl backdrop-saturate-150"
-    aria-label="Main"
-  >
-    <a href="/" data-home class="flex items-center gap-2.5 rounded-full pr-2" aria-label="Macro home">
-      <img src="/icon.png" alt="" width="36" height="36" class="size-9 rounded-[10px]" />
-      <span class="font-display text-[22px] font-semibold tracking-[-0.035em]">Macro</span>
-    </a>
+<!-- On mobile it sits above the hero card. From sm up it sits inset inside the card, and from lg up (where the hero
+     text is left-aligned) the logo lines up with the headline. At the top it lies flat on the page, with no bar behind
+     it; as you scroll it lifts off into a floating bar (see .nav in global.css). Its button only shows while no other
+     "Join the beta" button is on screen. -->
+<header data-nav class="nav fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-4">
+  <div class="mx-auto max-w-6xl lg:px-[26px]">
+    <nav class="nav-bar relative z-0 flex h-16 items-center justify-between pr-2 pl-3.5" aria-label="Main">
+      <a href="/" data-home class="flex items-center gap-2.5 rounded-full pr-2" aria-label="Macro home">
+        <img src="/icon.png" alt="" width="36" height="36" class="size-9 rounded-[10px]" />
+        <span class="font-display text-[22px] font-semibold tracking-[-0.035em]">Macro</span>
+      </a>
 
-    <div class="hidden items-center gap-6 text-[15px] text-ink/70 md:flex lg:gap-9">
-      {
-        links.map((link) => (
-          <a href={link.href} class="transition-colors hover:text-ink">
-            {link.label}
-          </a>
-        ))
-      }
-    </div>
+      <div class="hidden items-center gap-6 text-[15px] text-ink/70 md:flex lg:gap-9">
+        {
+          links.map((link) => (
+            <a href={link.href} class="transition-colors hover:text-ink">
+              {link.label}
+            </a>
+          ))
+        }
+      </div>
 
-    <a href={site.betaUrl} target="_blank" rel="noopener" class="btn btn-primary h-12 px-6 text-[15px]">{site.ctaLabel}</a>
-  </nav>
+      <a href={site.betaUrl} target="_blank" rel="noopener" class="nav-cta btn btn-primary h-12 px-6 text-[15px]">
+        {site.ctaLabel}
+      </a>
+    </nav>
+  </div>
 </header>
 
 <script>
   const header = document.querySelector<HTMLElement>('[data-nav]');
   if (header) {
-    const update = () => header.toggleAttribute('data-scrolled', window.scrollY > 16);
+    // --lift eases from 0 to 1 over the first LIFT_PX of scroll. Only written when it changes, so scrolling further
+    // down the page doesn't restyle the nav.
+    const LIFT_PX = 64;
+    let lift = -1;
+    const update = () => {
+      const t = Math.min(Math.max(window.scrollY / LIFT_PX, 0), 1);
+      const next = Math.round((1 - (1 - t) ** 2) * 100) / 100;
+      if (next !== lift) header.style.setProperty('--lift', String((lift = next)));
+    };
     update();
     window.addEventListener('scroll', update, { passive: true });
+
+    // Every other "Join the beta" button on the page is marked data-cta. The nav's own one shows only while none of
+    // them is on screen, so there's never more than one asking at a time. One that's slid up under the nav counts as
+    // gone. Pages without one (the privacy policy) always show it.
+    const ctas = document.querySelectorAll('[data-cta]');
+    if (ctas.length === 0) {
+      header.toggleAttribute('data-show-cta', true);
+    } else {
+      const onScreen = new Set<Element>();
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) onScreen.add(entry.target);
+            else onScreen.delete(entry.target);
+          }
+          header.toggleAttribute('data-show-cta', onScreen.size === 0);
+        },
+        { rootMargin: '-80px 0px 0px 0px' },
+      );
+      ctas.forEach((el) => io.observe(el));
+    }
   }
 
   // On the home page the logo scrolls back to the top rather than reloading, like the section links. Elsewhere it's
