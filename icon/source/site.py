@@ -24,7 +24,8 @@ def resized(im, size):
 def main(stem):
     master = Image.open(f'{stem}.png').convert('RGB')             # full-bleed: corners rounded by CSS or iOS
     rounded = Image.open(f'{stem}-rounded.png').convert('RGBA')   # cut to the icon shape
-    resized(master, 160).save(f'{PUBLIC}/icon.png', optimize=True)
+    # the site shows icon.png at up to 80px (the closing call to action), so 240 keeps it sharp on 3x screens
+    resized(master, 240).save(f'{PUBLIC}/icon.png', optimize=True)
     resized(master, 180).save(f'{PUBLIC}/apple-touch-icon.png', optimize=True)
     resized(rounded, 64).save(f'{PUBLIC}/favicon.png', optimize=True)
     resized(rounded, 512).save(f'{PUBLIC}/icon-512.png', optimize=True)

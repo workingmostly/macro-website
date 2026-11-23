@@ -72,12 +72,20 @@ It writes the four icon files the site reads from `public/`, from the look's mas
 
 | File | Size | From |
 | ---- | ---- | ---- |
-| `icon.png` | 160 × 160 | `NAME.png` (the site rounds the corners in CSS) |
+| `icon.png` | 240 × 240 | `NAME.png` (the site rounds the corners in CSS; it's shown at up to 80px, so 240 stays sharp on 3x screens) |
 | `apple-touch-icon.png` | 180 × 180 | `NAME.png` (iOS rounds the corners) |
 | `favicon.png` | 64 × 64 | `NAME-rounded.png` |
 | `icon-512.png` | 512 × 512 | `NAME-rounded.png` (also the Open Graph image) |
 
 It also swaps the icon embedded in slide 5 of the Instagram carousel. Re-export that slide's PNG preview afterwards (from Figma, or any renderer with Inter and Inter Tight installed) so `instagram/previews/` stays in step.
+
+## Social media
+
+`social/macro-icon-1080.png` (Instagram's square) and `social/macro-icon-2048.png` are the chosen icon as a full square: no rounded corners, with the black background running right to the edges. Use them for profile pictures and posts; when a profile picture is cropped to a circle, the whole fork and knife stay inside it. To make them for another look:
+
+```bash
+python3 icon/source/social.py macros black    # round (macros, ideas or looks), then the look
+```
 
 ## Re-rendering
 
@@ -98,6 +106,7 @@ python3 icon/source/macros.py icon/macros midnight
 | `source/ideas.py` | Round two. Draws pieces one at a time, so each can have its own level and colour, and they can be rotated or overlap (the top piece's glass bends what's under it). Also has the green glass, neon and clay materials. |
 | `source/macros.py` | Round three. The green and blue pair on top of `ideas.py`; `GREEN_AT` and `BLUE_AT` set where the two levels sit. |
 | `source/site.py` | Puts a look live: the four `public/` icons and the icon on Instagram slide 5. |
+| `source/social.py` | Full-square PNGs of a look for social media, in `social/`. |
 | `source/render.py` | The shared machinery: distance fields, the height map, normals, the icon outline and PNG output. |
 | `source/geom.py` | A small path type that writes SVG and rasterises. |
 | `source/export.py` | Writes everything in this folder. |
