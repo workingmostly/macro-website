@@ -1,6 +1,6 @@
 # App icon
 
-Macro's fork and knife, redrawn from scratch and rendered as real materials. Round one has four directions, of which Fill (glass cutlery with green-filled handles) went forward. Round two, in `ideas/`, has thirteen ideas built on Fill. Round three, in `macros/`, takes the favourite of those, green calories in the fork and blue protein in the knife, ten ways. The current pick is **`macros/midnight.png`**. None of them is live yet: the site still uses the old icon (see [Putting one live](#putting-one-live)).
+Macro's fork and knife, redrawn from scratch and rendered as real materials. Round one has four directions, of which Fill (glass cutlery with green-filled handles) went forward. Round two, in `ideas/`, has thirteen ideas built on Fill. Round three, in `macros/`, takes the favourite of those, green calories in the fork and blue protein in the knife, ten ways. The chosen icon is **`macros/black.png`** (On black), and the site's icons and slide 5 of the Instagram carousel now come from it (see [Putting one live](#putting-one-live)). For the app, drop `macros/black.png` into Xcode's AppIcon.
 
 ## Round three: green and blue
 
@@ -8,8 +8,8 @@ Calories in green and protein in blue, the same colours as the app. The first fi
 
 | Take | File | What it is |
 | ---- | ---- | ---------- |
-| On black | `macros/black.png` | Round two's Two macros: the fork filled green, the knife filled blue a little lower, on black. |
-| **Midnight** (pick) | `macros/midnight.png` | The same pair on deep navy. The blue glow belongs there, and the green stands out more. |
+| **On black** (chosen) | `macros/black.png` | Round two's Two macros: the fork filled green, the knife filled blue a little lower, on black. |
+| Midnight | `macros/midnight.png` | The same pair on deep navy. The blue glow belongs there, and the green stands out more. |
 | Smoked glass | `macros/smoked.png` | Black glass on a white tile, for a light icon that matches the website. |
 | Even | `macros/even.png` | Both filled to the same level. |
 | Fuller | `macros/full.png` | Calories up into the fork's head, protein up the blade. |
@@ -62,7 +62,13 @@ The masters work as they are. Fill and Level are glass looks, so on iOS 26 they 
 
 ## Putting one live
 
-The site reads four files from `public/`. Each comes from the chosen look, in this folder, `ideas/` or `macros/`:
+One command swaps everything over to a look, given its path without `.png` (this is how On black went live):
+
+```bash
+python3 icon/source/site.py icon/macros/black
+```
+
+It writes the four icon files the site reads from `public/`, from the look's master and rounded PNGs:
 
 | File | Size | From |
 | ---- | ---- | ---- |
@@ -71,7 +77,7 @@ The site reads four files from `public/`. Each comes from the chosen look, in th
 | `favicon.png` | 64 × 64 | `NAME-rounded.png` |
 | `icon-512.png` | 512 × 512 | `NAME-rounded.png` (also the Open Graph image) |
 
-Slide 5 of the Instagram carousel embeds the icon as well, so it needs the same swap.
+It also swaps the icon embedded in slide 5 of the Instagram carousel. Re-export that slide's PNG preview afterwards (from Figma, or any renderer with Inter and Inter Tight installed) so `instagram/previews/` stays in step.
 
 ## Re-rendering
 
@@ -91,6 +97,7 @@ python3 icon/source/macros.py icon/macros midnight
 | `source/looks.py` | The four materials and their lighting. Each look's arguments are its knobs: where the green level sits, how frosted the glass is, how bright the lights are. |
 | `source/ideas.py` | Round two. Draws pieces one at a time, so each can have its own level and colour, and they can be rotated or overlap (the top piece's glass bends what's under it). Also has the green glass, neon and clay materials. |
 | `source/macros.py` | Round three. The green and blue pair on top of `ideas.py`; `GREEN_AT` and `BLUE_AT` set where the two levels sit. |
+| `source/site.py` | Puts a look live: the four `public/` icons and the icon on Instagram slide 5. |
 | `source/render.py` | The shared machinery: distance fields, the height map, normals, the icon outline and PNG output. |
 | `source/geom.py` | A small path type that writes SVG and rasterises. |
 | `source/export.py` | Writes everything in this folder. |
