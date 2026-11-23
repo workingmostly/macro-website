@@ -1,6 +1,8 @@
 # App icon
 
-Four takes on Macro's fork and knife, redrawn from scratch and rendered as real materials. **Fill** is the recommended one. None of them is live yet: the site still uses the old icon (see [Putting one live](#putting-one-live)).
+Macro's fork and knife, redrawn from scratch and rendered as real materials. Round one has four directions, and **Fill** is the recommended one. Round two, in `ideas/`, has thirteen more ideas built on Fill. None of them is live yet: the site still uses the old icon (see [Putting one live](#putting-one-live)).
+
+## Round one
 
 | Look | Master | What it is |
 | ---- | ------ | ---------- |
@@ -13,6 +15,26 @@ Four takes on Macro's fork and knife, redrawn from scratch and rendered as real 
 - `NAME-rounded.png` is the same art cut to the iOS icon shape, with a thin glass bezel, on transparency. Use it wherever iOS isn't doing the masking: the website, social posts, decks.
 - `cutlery.svg` is the fork and knife as flat vector paths on a 1024 artboard, for Figma, Icon Composer or a favicon.
 
+## Round two: ideas built on Fill
+
+Same cutlery and glass as Fill; each idea changes one thing. They're in `ideas/`, with a master and a rounded version each, like round one. The three marked are my favourites.
+
+| Idea | File | What changes |
+| ---- | ---- | ------------ |
+| **Two macros** ★ | `ideas/macros.png` | Calories in the fork (green), protein in the knife (blue), each at its own level. The app's two drags in one icon. |
+| Brimming | `ideas/brimming.png` | Filled right up into the tines and the blade. |
+| Calorie ramp | `ideas/ramp.png` | The liquid runs through the app's calorie colours, green at the bottom to yellow at the top. |
+| **Smoked glass** ★ | `ideas/smoked.png` | A light version: black glass on a white tile, with the green showing through. |
+| **Midnight** ★ | `ideas/midnight.png` | Fill on deep navy instead of black. |
+| Emerald | `ideas/emerald.png` | A deep green tile with the fill in bright mint. |
+| Tilted | `ideas/tilted.png` | The pair leaning into the corner; the liquid stays level, so it sits at an angle in the handles. |
+| Crossed | `ideas/crossed.png` | Fork and knife crossed, the knife resting on the fork. |
+| Just the fork | `ideas/solo.png` | One big fork, the simplest shape at small sizes. |
+| Green glass | `ideas/jelly.png` | Cutlery cast in green glass, lit from inside. |
+| Neon | `ideas/neon.png` | One green glass tube bent around the fork and knife, like a diner sign. |
+| Clay | `ideas/clay.png` | Soft matte white cutlery on mint. The softest at small sizes. |
+| Frost on green | `ideas/mint.png` | White frosted glass on a bright green tile; the whole tile is the fill. |
+
 ## Why the glyph is new
 
 The old fork and knife closely matches Apple's SF Symbol `fork.knife`, and Apple's guidelines don't allow SF Symbols, or glyphs confusingly similar to them, in app icons. The new pair is drawn from scratch: four round-tipped tines, a knife with a straight spine and no notch, and one handle shape shared by both (narrow at the neck, flaring to a round end) so they read as a set. It's also a little bolder than the old glyph, so it holds up at Settings and notification sizes.
@@ -23,7 +45,7 @@ The masters work as they are. Fill and Level are glass looks, so on iOS 26 they 
 
 ## Putting one live
 
-The site reads four files from `public/`. Each comes from the chosen look:
+The site reads four files from `public/`. Each comes from the chosen look, in this folder or in `ideas/`:
 
 | File | Size | From |
 | ---- | ---- | ---- |
@@ -38,14 +60,17 @@ Slide 5 of the Instagram carousel embeds the icon as well, so it needs the same 
 
 ```bash
 pip install numpy scipy pillow pyamg
-python3 icon/source/export.py icon          # all four, about a minute
+python3 icon/source/export.py icon          # round one, about a minute
 python3 icon/source/export.py icon fill     # just one
+python3 icon/source/ideas.py icon/ideas     # round two, about six minutes
+python3 icon/source/ideas.py icon/ideas neon
 ```
 
 | File | Holds |
 | ---- | ----- |
 | `source/shapes.py` | The fork and knife. Every proportion is in `P` at the top. |
 | `source/looks.py` | The four materials and their lighting. Each look's arguments are its knobs: where the green level sits, how frosted the glass is, how bright the lights are. |
+| `source/ideas.py` | Round two. Draws pieces one at a time, so each can have its own level and colour, and they can be rotated or overlap (the top piece's glass bends what's under it). Also has the green glass, neon and clay materials. |
 | `source/render.py` | The shared machinery: distance fields, the height map, normals, the icon outline and PNG output. |
 | `source/geom.py` | A small path type that writes SVG and rasterises. |
 | `source/export.py` | Writes everything in this folder. |
