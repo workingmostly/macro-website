@@ -1,6 +1,23 @@
 # App icon
 
-Macro's fork and knife, redrawn from scratch and rendered as real materials. Round one has four directions, and **Fill** is the recommended one. Round two, in `ideas/`, has thirteen more ideas built on Fill. None of them is live yet: the site still uses the old icon (see [Putting one live](#putting-one-live)).
+Macro's fork and knife, redrawn from scratch and rendered as real materials. Round one has four directions, of which Fill (glass cutlery with green-filled handles) went forward. Round two, in `ideas/`, has thirteen ideas built on Fill. Round three, in `macros/`, takes the favourite of those, green calories in the fork and blue protein in the knife, ten ways. The current pick is **`macros/midnight.png`**. None of them is live yet: the site still uses the old icon (see [Putting one live](#putting-one-live)).
+
+## Round three: green and blue
+
+Calories in green and protein in blue, the same colours as the app. The first five keep the pair and change the setting; the other five change its form.
+
+| Take | File | What it is |
+| ---- | ---- | ---------- |
+| On black | `macros/black.png` | Round two's Two macros: the fork filled green, the knife filled blue a little lower, on black. |
+| **Midnight** (pick) | `macros/midnight.png` | The same pair on deep navy. The blue glow belongs there, and the green stands out more. |
+| Smoked glass | `macros/smoked.png` | Black glass on a white tile, for a light icon that matches the website. |
+| Even | `macros/even.png` | Both filled to the same level. |
+| Fuller | `macros/full.png` | Calories up into the fork's head, protein up the blade. |
+| Crossed | `macros/crossed.png` | The pair crossed, the blue knife resting on the green fork. |
+| Tilted | `macros/tilted.png` | Leaning into the corner, with both levels staying flat. |
+| Neon | `macros/neon.png` | Two tubes: a green fork and a blue knife. |
+| Cast glass | `macros/glass.png` | A green glass fork and a blue glass knife, each lit from inside. |
+| Frost on green and blue | `macros/frost.png` | White frosted cutlery on a tile that fades from green to blue. |
 
 ## Round one
 
@@ -45,7 +62,7 @@ The masters work as they are. Fill and Level are glass looks, so on iOS 26 they 
 
 ## Putting one live
 
-The site reads four files from `public/`. Each comes from the chosen look, in this folder or in `ideas/`:
+The site reads four files from `public/`. Each comes from the chosen look, in this folder, `ideas/` or `macros/`:
 
 | File | Size | From |
 | ---- | ---- | ---- |
@@ -64,6 +81,8 @@ python3 icon/source/export.py icon          # round one, about a minute
 python3 icon/source/export.py icon fill     # just one
 python3 icon/source/ideas.py icon/ideas     # round two, about six minutes
 python3 icon/source/ideas.py icon/ideas neon
+python3 icon/source/macros.py icon/macros   # round three, about five minutes
+python3 icon/source/macros.py icon/macros midnight
 ```
 
 | File | Holds |
@@ -71,6 +90,7 @@ python3 icon/source/ideas.py icon/ideas neon
 | `source/shapes.py` | The fork and knife. Every proportion is in `P` at the top. |
 | `source/looks.py` | The four materials and their lighting. Each look's arguments are its knobs: where the green level sits, how frosted the glass is, how bright the lights are. |
 | `source/ideas.py` | Round two. Draws pieces one at a time, so each can have its own level and colour, and they can be rotated or overlap (the top piece's glass bends what's under it). Also has the green glass, neon and clay materials. |
+| `source/macros.py` | Round three. The green and blue pair on top of `ideas.py`; `GREEN_AT` and `BLUE_AT` set where the two levels sit. |
 | `source/render.py` | The shared machinery: distance fields, the height map, normals, the icon outline and PNG output. |
 | `source/geom.py` | A small path type that writes SVG and rasterises. |
 | `source/export.py` | Writes everything in this folder. |
