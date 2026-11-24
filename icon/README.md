@@ -1,6 +1,6 @@
 # App icon
 
-Macro's fork and knife, redrawn from scratch and rendered as real materials. Round one has four directions, of which Fill (glass cutlery with green-filled handles) went forward. Round two, in `ideas/`, has thirteen ideas built on Fill. Round three, in `macros/`, takes the favourite of those, green calories in the fork and blue protein in the knife, ten ways. The chosen icon is **`macros/black.png`** (On black), and the site's icons and slide 5 of the Instagram carousel now come from it (see [Putting one live](#putting-one-live)). For the app, drop `macros/black.png` into Xcode's AppIcon.
+Macro's fork and knife, redrawn from scratch and rendered as real materials. Round one has four directions, of which Fill (glass cutlery with green-filled handles) went forward. Round two, in `ideas/`, has thirteen ideas built on Fill. Round three, in `macros/`, takes the favourite of those, green calories in the fork and blue protein in the knife, ten ways. The chosen icon is **`macros/black.png`** (On black), and the site's icons and slide 5 of the Instagram carousel now come from it (see [Putting one live](#putting-one-live)), as do the app's icon and launch screen (see [The app](#the-app)).
 
 ## Round three: green and blue
 
@@ -79,6 +79,17 @@ It writes the four icon files the site reads from `public/`, from the look's mas
 
 It also swaps the icon embedded in slide 5 of the Instagram carousel. Re-export that slide's PNG preview afterwards (from Figma, or any renderer with Inter and Inter Tight installed) so `instagram/previews/` stays in step.
 
+## The app
+
+The app (the `workingmostly/tally` repo) takes two things from here:
+
+- **The icon:** `macros/black.png`, saved over `Macro/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png`. It's a single 1024 × 1024 image with no transparency; iOS makes every other size from it, and the dark and tinted home screen styles too.
+- **The launch screen glyph:** the same fork and knife drawn flat, with the handles filled green and blue to the icon's levels, black on white and white on black. `source/launch.py` writes it into the app's `LaunchIcon.imageset`, under the file names that set already uses:
+
+```bash
+python3 icon/source/launch.py ../tally/Macro/Assets.xcassets/LaunchIcon.imageset
+```
+
 ## Social media
 
 `social/macro-icon-1080.png` (Instagram's square) and `social/macro-icon-2048.png` are the chosen icon as a full square: no rounded corners, with the black background running right to the edges. Use them for profile pictures and posts; when a profile picture is cropped to a circle, the whole fork and knife stay inside it. To make them for another look:
@@ -107,6 +118,7 @@ python3 icon/source/macros.py icon/macros midnight
 | `source/macros.py` | Round three. The green and blue pair on top of `ideas.py`; `GREEN_AT` and `BLUE_AT` set where the two levels sit. |
 | `source/site.py` | Puts a look live: the four `public/` icons and the icon on Instagram slide 5. |
 | `source/social.py` | Full-square PNGs of a look for social media, in `social/`. |
+| `source/launch.py` | The app's launch screen glyph, light and dark, at 1x, 2x and 3x. |
 | `source/render.py` | The shared machinery: distance fields, the height map, normals, the icon outline and PNG output. |
 | `source/geom.py` | A small path type that writes SVG and rasterises. |
 | `source/export.py` | Writes everything in this folder. |
