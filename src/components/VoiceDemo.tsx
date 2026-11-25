@@ -50,6 +50,13 @@ function frameAt(t: number, still: boolean) {
   };
 }
 
+/** Everything a frame shows, so the loop only re-renders when something on screen has changed. */
+function frameKey(t: number) {
+  const f = frameAt(t, false);
+  const words = BURRITO.words.filter((w) => f.heard(w.at)).length;
+  return [f.voice, f.field, f.value, f.estimate, f.ghost.x, f.ghost.y, f.ghost.shown, f.ghost.pressed, f.bubble, words].join();
+}
+
 export default function VoiceDemo() {
   const [t, setT] = useState(STILL);
   const [animate, setAnimate] = useState(false);
@@ -73,11 +80,17 @@ export default function VoiceDemo() {
     let elapsed = 0;
     let last = performance.now();
     let raf = 0;
+    let shown = frameKey(0);
     setT(0);
     const tick = (now: number) => {
       elapsed = (elapsed + Math.min(100, Math.max(0, now - last))) % LOOP;
       last = now;
-      setT(elapsed);
+      // Most frames look like the last one (the waveform draws itself), so this skips re-rendering for them.
+      const key = frameKey(elapsed);
+      if (key !== shown) {
+        shown = key;
+        setT(elapsed);
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);

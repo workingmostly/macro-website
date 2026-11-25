@@ -241,20 +241,32 @@ function BarWaveform({ mode, script, still }: { mode: BarMode; script: Script; s
     }
 
     let raf = 0;
-    let last = performance.now();
-    const start = last;
-    // Listening time stops counting once the estimate starts, so the speech never replays.
+    let last = 0;
+    // Both clocks only run while it's drawing, so it picks up where it left off. Listening time also stops once the
+    // estimate starts, so the speech never replays.
+    let clock = 0;
     let heard = 0;
     const frame = (now: number) => {
       const step = Math.min(0.1, Math.max(0, (now - last) / 1000));
       last = now;
+      clock += step;
       if (modeRef.current === 'listening') heard += step;
-      draw(ctx, width, feed.bumps(step, heard, (now - start) / 1000, modeRef.current, script), now / 1000);
+      draw(ctx, width, feed.bumps(step, heard, clock, modeRef.current, script), now / 1000);
       raf = requestAnimationFrame(frame);
     };
-    raf = requestAnimationFrame(frame);
+    // The demos pause where they are when scrolled away, which can leave a bar listening off screen, so it only
+    // draws while it's on screen.
+    const visible = new IntersectionObserver((entries) => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      if (!entries[entries.length - 1].isIntersecting) return;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    });
+    visible.observe(canvas);
     return () => {
       cancelAnimationFrame(raf);
+      visible.disconnect();
       resize.disconnect();
     };
   }, [script, still]);
