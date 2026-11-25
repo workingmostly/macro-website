@@ -1,21 +1,12 @@
 ---
 import FeatureCard from './FeatureCard.astro';
-import { StatsCard, SAMPLE_DAY } from '../screens/ios';
+import VoiceDemo from '../VoiceDemo';
+import { EmojiDemo, GoalsDemo, MacroSplitDemo, TrackingDemo } from '../FeatureDemos';
 import { AdherenceCard } from '../screens/Adherence';
-
-const day = SAMPLE_DAY.reduce((t, m) => ({ calories: t.calories + m.calories, protein: t.protein + m.protein }), {
-  calories: 0,
-  protein: 0,
-});
-
-const toggles = [
-  { label: 'Calories', on: true },
-  { label: 'Macros', on: true },
-  { label: 'Fibre', on: false },
-  { label: 'Food emojis', on: true },
-];
 ---
 
+<!-- The toggles, segmented controls, slider, emoji chips and stats card in these cards all work. Each is a React
+     island that hydrates as it scrolls into view; until then (or without JavaScript) it shows its default state. -->
 <section id="features" class="px-3 pt-28 sm:px-4 sm:pt-40">
   <div class="reveal mx-auto max-w-3xl px-3 text-center">
     <p class="eyebrow text-ios-purple">Features</p>
@@ -27,16 +18,21 @@ const toggles = [
 
   <div class="mt-14 grid gap-3 sm:mt-20 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
     <FeatureCard
+      full
+      badge="New"
+      title="Or just say what you ate."
+      body="Tap the mic and describe your meal in your own words. Macro fills in the calories and protein, picks an emoji, and leaves every number ready to nudge before you save. It all happens on your iPhone, with Apple Intelligence, and what you say is never stored."
+      note="On iPhones with Apple Intelligence, running iOS 26."
+    >
+      <VoiceDemo client:visible={{ rootMargin: '200px' }} />
+    </FeatureCard>
+
+    <FeatureCard
       wide
       title="Carbs and fat, worked out for you."
       body="Protein is set aside, and the calories left over are split between carbs and fat: 60/40 by default, adjustable to suit how you eat. Rather enter one yourself? Switch to manual and the other is still calculated exactly."
     >
-      <div class="w-full max-w-[380px]">
-        <div class="ios-scope rounded-[24px] shadow-[0_24px_60px_-28px_rgb(0_0_0/0.35)]">
-          <StatsCard calories={day.calories} protein={day.protein} expanded />
-        </div>
-        <p class="mt-5 text-center font-mono text-[13px] text-ink/45">kcal = 4 × protein + 4 × carbs + 9 × fat</p>
-      </div>
+      <MacroSplitDemo client:visible />
     </FeatureCard>
 
     <FeatureCard
@@ -76,6 +72,14 @@ const toggles = [
           <span class="text-[8px] font-semibold tracking-[0.14em] text-ios-green">CALORIES</span>
           <span class="mt-0.5 text-[56px] leading-none font-extralight">0</span>
           <span class="mt-1 text-[10px] text-muted">Kcal</span>
+          <!-- Cancel and the mic, along the bottom as on the real screen. -->
+          <span class="absolute bottom-2.5 left-1/2 h-[13px] w-[34px] -translate-x-1/2 rounded-full bg-[#f2f2f7] ring-[0.5px] ring-black/10"></span>
+          <span class="absolute right-[6px] bottom-[9px] grid size-[15px] place-items-center rounded-full bg-[#f2f2f7] ring-[0.5px] ring-black/10">
+            <svg width="7" height="7" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <rect x="6.6" y="1.2" width="6.8" height="11" rx="3.4" fill="currentColor"></rect>
+              <path d="M3.9 9.2a6.1 6.1 0 0012.2 0M10 15.4v3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path>
+            </svg>
+          </span>
         </div>
       </div>
     </FeatureCard>
@@ -83,9 +87,9 @@ const toggles = [
     <FeatureCard
       wide
       title="On track, at a glance."
-      body="Macro looks at your week and gives you a straight answer. A day counts when calories land within 10% of your goal, over or under, and protein gets close or goes over. Tap the badge to see why, and what would change it."
+      body="Macro looks at your week and gives you a straight answer. A day counts when calories land within 10% of your goal, over or under, and protein gets close or goes over. Tap the badge to see why, and how each day did."
     >
-      <AdherenceCard className="w-full max-w-[380px]" />
+      <AdherenceCard client:visible className="w-full max-w-[380px]" />
     </FeatureCard>
 
     <FeatureCard
@@ -103,7 +107,7 @@ const toggles = [
               <span class="text-[15px] font-semibold">Lunch?</span>
               <span class="text-[13px] text-muted">now</span>
             </div>
-            <p class="text-[15px] leading-snug text-ink/80">You usually eat around 12:45.</p>
+            <p class="text-[15px] leading-snug text-ink/80">You usually eat around 12:45 PM.</p>
           </div>
         </div>
       </div>
@@ -113,23 +117,7 @@ const toggles = [
       title="Emoji, not ingredients."
       body="Tag a meal with a single emoji instead of typing out what it was. Macro learns what you tend to log at a given size and suggests one."
     >
-      <div class="flex flex-col items-center">
-        <span class="text-[64px] leading-none">🍗</span>
-        <div class="mt-6 flex gap-2">
-          {
-            ['🍣', '🥗', '🍗', '🍕', '🥪'].map((e) => (
-              <span
-                class:list={[
-                  'grid size-12 place-items-center rounded-[13px] text-[26px]',
-                  e === '🍗' ? 'bg-[#dcdce1]' : 'bg-white',
-                ]}
-              >
-                {e}
-              </span>
-            ))
-          }
-        </div>
-      </div>
+      <EmojiDemo client:visible />
     </FeatureCard>
 
     <FeatureCard
@@ -163,7 +151,7 @@ const toggles = [
             fill="url(#cloud)"></path>
           <path d="M48 47l11 11 22-22" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
         </svg>
-        <p class="ios-scope mt-4 text-[15px] text-muted">Synced · just now</p>
+        <p class="ios-scope mt-4 text-[15px]">Synced <span class="text-faint">·</span> <span class="text-muted">moments ago</span></p>
       </div>
     </FeatureCard>
 
@@ -171,49 +159,14 @@ const toggles = [
       title="Goals in a minute."
       body="Not sure what to aim for? The built-in calculator works out calories and protein from your stats and whether you want to lose, maintain or gain."
     >
-      <div class="ios-scope w-full max-w-[300px]">
-        <div class="flex rounded-[10px] bg-[#e3e3e8] p-[3px] text-[14px] font-medium">
-          {
-            ['Lose', 'Maintain', 'Gain'].map((label) => (
-              <span
-                class:list={[
-                  'flex-1 rounded-[8px] py-1.5 text-center',
-                  label === 'Lose' && 'bg-white shadow-[0_2px_6px_rgb(0_0_0/0.12)]',
-                ]}
-              >
-                {label}
-              </span>
-            ))
-          }
-        </div>
-        <div class="mt-4 flex items-center justify-between rounded-[14px] bg-white px-4 py-3.5 text-[16px]">
-          <span>Suggested</span>
-          <span class="text-muted tabular-nums">1,850 kcal · 160 g</span>
-        </div>
-      </div>
+      <GoalsDemo client:visible />
     </FeatureCard>
 
     <FeatureCard
       title="Track as much as you like."
       body="Calories only, calories and macros, or fibre too. Each extra is just one more drag, and you can change your mind any time."
     >
-      <div class="ios-scope w-full max-w-[300px] overflow-hidden rounded-[14px] bg-white">
-        {
-          toggles.map((t, i) => (
-            <div class:list={['flex items-center justify-between py-2.5 pr-3 pl-4 text-[16px]', i > 0 && 'border-t-[0.5px] border-black/10']}>
-              {t.label}
-              <span class:list={['relative inline-block h-[26px] w-[42px] rounded-full', t.on ? 'bg-ios-green' : 'bg-[#e3e3e8]']}>
-                <span
-                  class:list={[
-                    'absolute top-[2px] size-[22px] rounded-full bg-white shadow-[0_2px_4px_rgb(0_0_0/0.2)]',
-                    t.on ? 'left-[18px]' : 'left-[2px]',
-                  ]}
-                />
-              </span>
-            </div>
-          ))
-        }
-      </div>
+      <TrackingDemo client:visible />
     </FeatureCard>
   </div>
 </section>

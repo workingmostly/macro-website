@@ -10,6 +10,7 @@ import {
   calorieAccent,
   type MealGroup,
 } from './screens/ios';
+import { GUESS, SAID, SAID_LENGTH, type VoicePhase } from './screens/Voice';
 
 type Step = 'calories' | 'protein' | 'emoji' | 'today';
 
@@ -28,6 +29,10 @@ const HOLD_MS = 300;
 const HOLD_SLOP = 10;
 /** A touch this soon after the page moved is catching a fling, not reaching for the demo. */
 const SCROLL_SETTLE_MS = 150;
+/** Nobody's really talking to the demo, so it stops listening this long after the made-up sentence ends. */
+const LISTEN_TAIL_MS = 1200;
+/** How long the pretend estimate takes. */
+const ESTIMATE_MS = 1300;
 
 const SEED: MealGroup[] = [
   { id: 'b', label: 'Breakfast', time: '8 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
@@ -72,6 +77,11 @@ export default function HeroDemo() {
   const [inView, setInView] = useState(false);
   const [ghost, setGhostState] = useState<Ghost>({ x: 250, y: 640, visible: false, pressed: false });
   const [touchUI, setTouchUI] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  // The voice estimate: listening, then estimating, then the guess fills every value with its name underneath.
+  const [voice, setVoice] = useState<VoicePhase>('idle');
+  const [estimate, setEstimate] = useState<string | null>(null);
+  const [easeFill, setEaseFill] = useState(false);
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
@@ -80,11 +90,53 @@ export default function HeroDemo() {
   const dragRef = useRef<Drag | null>(null);
   const holdRef = useRef(0);
   const scrolledAtRef = useRef(-Infinity);
+  const voiceTimersRef = useRef<number[]>([]);
 
   const setGhost = useCallback((next: Partial<Ghost>) => {
     ghostRef.current = { ...ghostRef.current, ...next };
     setGhostState(ghostRef.current);
   }, []);
+
+  /* ── Voice ────────────────────────────────────────────── */
+
+  const clearVoiceTimers = () => {
+    voiceTimersRef.current.forEach(clearTimeout);
+    voiceTimersRef.current = [];
+  };
+  const later = (ms: number, fn: () => void) => {
+    voiceTimersRef.current.push(window.setTimeout(fn, ms));
+  };
+
+  const stopVoice = () => {
+    clearVoiceTimers();
+    setVoice('idle');
+  };
+
+  const finishListening = () => {
+    clearVoiceTimers();
+    setVoice('estimating');
+    later(ESTIMATE_MS, () => {
+      // Like VoiceEstimator.apply: every value filled, the emoji picked, and it stays on this step to confirm.
+      setVoice('idle');
+      setCalories(GUESS.calories);
+      setProtein(GUESS.protein);
+      setEmoji(GUESS.emoji);
+      setEstimate(GUESS.name);
+      setEaseFill(true);
+      later(400, () => setEaseFill(false));
+    });
+  };
+
+  const onMic = () => {
+    if (voice === 'listening') return finishListening();
+    if (voice !== 'idle') return;
+    stopAuto();
+    clearVoiceTimers();
+    setVoice('listening');
+    later(SAID_LENGTH * 1000 + LISTEN_TAIL_MS, finishListening);
+  };
+
+  useEffect(() => clearVoiceTimers, []);
 
   /* ── Flow ─────────────────────────────────────────────── */
 
@@ -114,12 +166,16 @@ export default function HeroDemo() {
     else if (step === 'emoji') setStep('protein');
   };
 
+  // While listening or estimating, Cancel backs out of the voice estimate only, not the whole entry.
   const cancel = () => {
+    if (voice !== 'idle') return stopVoice();
     setNewId(null);
     setStep('today');
   };
 
   const startNew = () => {
+    stopVoice();
+    setEstimate(null);
     setCalories(0);
     setProtein(0);
     setEmoji('🍽️');
@@ -141,7 +197,10 @@ export default function HeroDemo() {
     if (!el) return;
     const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 });
     io.observe(el);
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setAuto(false);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setAuto(false);
+      setReducedMotion(true);
+    }
     setTouchUI(window.matchMedia('(pointer: coarse)').matches);
     return () => io.disconnect();
   }, []);
@@ -203,6 +262,7 @@ export default function HeroDemo() {
         setCalories(0);
         setProtein(0);
         setEmoji('🍽️');
+        setEstimate(null);
         setMeals(SEED);
         setNewId(null);
         setGhost({ x: 255, y: 660, visible: false, pressed: false });
@@ -294,7 +354,8 @@ export default function HeroDemo() {
       moved: false,
     };
     e.currentTarget.setPointerCapture(e.pointerId);
-    if (touch && slider) {
+    // Nothing to grab while it listens, so a resting finger is left free to scroll the page.
+    if (touch && slider && voice === 'idle') {
       const id = e.pointerId;
       clearTimeout(holdRef.current);
       holdRef.current = window.setTimeout(() => {
@@ -314,6 +375,8 @@ export default function HeroDemo() {
       if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > HOLD_SLOP) endDrag();
       return;
     }
+    // The app ignores drags while it listens.
+    if (voice !== 'idle') return;
     if (d.pos0 === null) {
       d.pos0 = slider ? SCALES[step].position(step === 'calories' ? calories : protein) : 0;
       d.x0 = e.clientX;
@@ -323,8 +386,10 @@ export default function HeroDemo() {
     const dx = (e.clientX - d.x0) / d.scale;
     if (!d.moved && Math.hypot(dx, dy) > TAP_SLOP) d.moved = true;
     if (!d.moved) return;
+    // Changing a value by hand drops the estimate's name, as in the app.
     if (step === 'calories') setCalories(snapCalories(SCALES.calories.value(d.pos0 + dy * GAIN)));
     else if (step === 'protein') setProtein(Math.max(0, Math.round(SCALES.protein.value(d.pos0 + dy * GAIN))));
+    if (slider) setEstimate(null);
   };
 
   const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
@@ -333,6 +398,9 @@ export default function HeroDemo() {
     endDrag();
     if (d.moved || d.held) return;
     stopAuto();
+    // While listening, a tap anywhere means "done talking".
+    if (voice === 'listening') return finishListening();
+    if (voice === 'estimating') return;
     if ((e.clientX - d.left) / d.width < BACK_ZONE) back();
     else advance();
   };
@@ -341,11 +409,16 @@ export default function HeroDemo() {
     if (e.target !== e.currentTarget) return;
     const big = e.shiftKey;
     let handled = true;
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    if (voice !== 'idle') {
+      if (e.key === 'Escape' || e.key === 'Backspace') stopVoice();
+      else if ((e.key === 'Enter' || e.key === ' ') && voice === 'listening') finishListening();
+      else handled = e.key === 'Enter' || e.key === ' ';
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       const dir = e.key === 'ArrowUp' ? 1 : -1;
       if (step === 'calories') setCalories((v) => Math.max(0, v + dir * (big ? 50 : 10)));
       else if (step === 'protein') setProtein((v) => Math.max(0, v + dir * (big ? 5 : 1)));
       else handled = false;
+      if (handled) setEstimate(null);
     } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && step === 'emoji') {
       const i = EMOJI_PALETTE.indexOf(emoji);
       const next = (i + (e.key === 'ArrowRight' ? 1 : -1) + EMOJI_PALETTE.length) % EMOJI_PALETTE.length;
@@ -367,29 +440,53 @@ export default function HeroDemo() {
   /* ── Render ───────────────────────────────────────────── */
 
   const glow =
-    step === 'calories' ? calorieAccent(calories) : step === 'protein' ? PROTEIN_BLUE : step === 'today' ? '#34c759' : '#c7c7cc';
+    voice !== 'idle'
+      ? '#c7c7cc'
+      : step === 'calories'
+        ? calorieAccent(calories)
+        : step === 'protein'
+          ? PROTEIN_BLUE
+          : step === 'today'
+            ? '#34c759'
+            : '#c7c7cc';
 
-  const hint = auto
-    ? touchUI
-      ? 'Go on, have a go. Press and hold the screen, then drag.'
-      : 'Go on, have a go. Drag the screen.'
-    : slider
-      ? touchUI
-        ? 'Press and hold, then drag up or down. Tap to confirm.'
-        : 'Drag up or down anywhere. Tap to confirm.'
-      : step === 'emoji'
-        ? 'Pick a food, or just tap to skip.'
-        : 'Tap + to add a meal.';
+  const hint =
+    voice === 'listening'
+      ? `Pretend you just said “${SAID.charAt(0).toLowerCase()}${SAID.slice(1)}”. Tap when you're done.`
+      : voice === 'estimating'
+        ? 'Working it out on the phone itself.'
+        : auto
+          ? touchUI
+            ? 'Go on, have a go. Press and hold the screen, then drag.'
+            : 'Go on, have a go. Drag the screen.'
+          : slider && estimate
+            ? 'Filled in from what you said. Drag to adjust, or tap to confirm.'
+            : slider
+              ? step === 'calories'
+                ? touchUI
+                  ? 'Press and hold, then drag. Or tap the mic. Tap to confirm.'
+                  : 'Drag up or down anywhere, or tap the mic. Tap to confirm.'
+                : touchUI
+                  ? 'Press and hold, then drag up or down. Tap to confirm.'
+                  : 'Drag up or down anywhere. Tap to confirm.'
+              : step === 'emoji'
+                ? 'Pick a food, or just tap to skip.'
+                : 'Tap + to add a meal.';
 
   const stepIndex = step === 'calories' ? 0 : step === 'protein' ? 1 : 2;
+  const estimated = estimate ? `, estimated from “${estimate}”` : '';
   const announce =
-    step === 'calories'
-      ? `${calories} kilocalories`
-      : step === 'protein'
-        ? `${protein} grams of protein`
-        : step === 'emoji'
-          ? `Food: ${emoji}`
-          : 'Meal logged';
+    voice === 'listening'
+      ? 'Listening'
+      : voice === 'estimating'
+        ? 'Estimating'
+        : step === 'calories'
+          ? `${calories} kilocalories${estimated}`
+          : step === 'protein'
+            ? `${protein} grams of protein${estimated}`
+            : step === 'emoji'
+              ? `Food: ${emoji}`
+              : 'Meal logged';
 
   return (
     <div ref={wrapRef} className="relative flex flex-col items-center">
@@ -429,6 +526,11 @@ export default function HeroDemo() {
               label="Dinner"
               time="19:30"
               emoji={emoji}
+              voice={voice}
+              onMic={onMic}
+              estimate={slider ? estimate : null}
+              easeFill={easeFill}
+              stillWave={reducedMotion}
               onPickEmoji={(e) => {
                 stopAuto();
                 setEmoji(e);

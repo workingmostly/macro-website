@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import { MicGlyph, Spinner, StopGlyph, VoiceWaveform, type VoicePhase } from './Voice';
 
 /* ────────────────────────────────────────────────────────────
    Shared model + maths, mirroring the app's Support/ folder.
@@ -14,6 +15,8 @@ export interface MealGroup {
   emojis: string[];
   calories: number;
   protein: number;
+  /** A Breakfast, Lunch or Dinner slot with nothing in it yet (see withEmptySlots). */
+  empty?: boolean;
 }
 
 /** The app's default goals. */
@@ -24,6 +27,10 @@ export const CARBS_SPLIT = 0.6;
 export const PROTEIN_BLUE = '#007aff';
 export const FILL_MAX: Record<'calories' | 'protein', number> = { calories: 800, protein: 80 };
 
+/** AdherenceTint: a soft green and amber, since system orange is too loud for a status that isn't an error. */
+export const ADHERENCE = { on: 'rgb(117 189 133)', off: 'rgb(235 163 82)' };
+
+/** Recents first, as FoodEmoji.ordered() puts them, then the app's starter chips. */
 export const EMOJI_PALETTE = ['🍽️', '🍣', '🍗', '🥗', '🍕', '🍔', '🥪', '🍎'];
 
 const nf = new Intl.NumberFormat('en-GB');
@@ -243,6 +250,19 @@ interface InputScreenProps {
   palette?: string[];
   onPickEmoji?: (emoji: string) => void;
   onCancel?: () => void;
+  /**
+   * The voice estimate's mic, which the app shows on the first step on an iPhone with Apple Intelligence. On by
+   * default, as on any current iPhone.
+   */
+  mic?: boolean;
+  voice?: VoicePhase;
+  onMic?: () => void;
+  /** What the voice estimate took the meal to be, shown under the number until a value is changed by hand. */
+  estimate?: string | null;
+  /** Eases the fill to its new height, as the app does when an estimate lands, instead of following a drag. */
+  easeFill?: boolean;
+  /** Draws the listening waveform as a still (reduced motion). */
+  stillWave?: boolean;
   children?: ReactNode;
 }
 
@@ -257,15 +277,30 @@ export function InputScreen({
   palette = EMOJI_PALETTE,
   onPickEmoji,
   onCancel,
+  mic = true,
+  voice = 'idle',
+  onMic,
+  estimate = null,
+  easeFill = false,
+  stillWave = false,
   children,
 }: InputScreenProps) {
   const isNumber = field !== 'emoji';
   const accent = field === 'calories' ? calorieAccent(value) : field === 'protein' ? PROTEIN_BLUE : '#8a8a8e';
   const fill = isNumber ? Math.min(1, Math.max(0, value / FILL_MAX[field])) : 0;
+  const listening = voice !== 'idle' && isNumber;
+  // InputView.showsVoiceButton: only on the first step, so the guess fills everything before anything's confirmed.
+  const showMic = mic && (listening || (stepIndex === 0 && isNumber));
 
   return (
     <div className="ios-input" style={{ '--accent': accent } as CSSProperties}>
-      {fill > 0 && <div className="ios-fill" style={{ transform: `translateY(${(1 - fill) * 100}%)` }} />}
+      {/* Kept in place through listening, even empty, so an estimate's fill has somewhere to ease up from. */}
+      {(fill > 0 || listening || easeFill) && (
+        <div
+          className={`ios-fill ${easeFill ? 'is-eased' : ''}`}
+          style={{ transform: `translateY(${(1 - fill) * 100}%)` }}
+        />
+      )}
 
       <div className="ios-segments">
         {Array.from({ length: stepCount }, (_, i) => (
@@ -284,19 +319,33 @@ export function InputScreen({
         </b>
       </div>
 
-      <div className="ios-readout">
-        <div className="ios-caption" style={{ color: accent }}>
-          {field === 'calories' ? 'CALORIES' : field === 'protein' ? 'PROTEIN' : 'FOOD'}
+      {listening ? (
+        // Takes the number's place while listening and estimating. No transcript, just bars that move with the voice.
+        <div className="ios-readout ios-voice" key="voice">
+          <div className="ios-caption" style={{ color: '#8a8a8e' }}>
+            {voice === 'estimating' ? 'ESTIMATING' : 'LISTENING'}
+          </div>
+          <div className="ios-wave">
+            <VoiceWaveform phase={voice} still={stillWave} />
+          </div>
+          <div className="ios-unit">{voice === 'estimating' ? 'Working it out' : 'Describe what you ate, then tap'}</div>
         </div>
-        {isNumber ? (
-          <>
-            <div className="ios-number">{fmt(value)}</div>
-            <div className="ios-unit">{field === 'calories' ? 'Kcal' : 'Grams'}</div>
-          </>
-        ) : (
-          <div className="ios-emoji-big">{emoji}</div>
-        )}
-      </div>
+      ) : (
+        <div className="ios-readout" data-field={field} key="number">
+          <div className="ios-caption" style={{ color: accent }}>
+            {field === 'calories' ? 'CALORIES' : field === 'protein' ? 'PROTEIN' : 'FOOD'}
+          </div>
+          {isNumber ? (
+            <>
+              <div className="ios-number">{fmt(value)}</div>
+              <div className="ios-unit">{field === 'calories' ? 'Kcal' : 'Grams'}</div>
+              {estimate && <div className="ios-hint">Estimated · {estimate}</div>}
+            </>
+          ) : (
+            <div className="ios-emoji-big">{emoji}</div>
+          )}
+        </div>
+      )}
 
       {field === 'emoji' && (
         <div className="ios-palette">
@@ -313,6 +362,11 @@ export function InputScreen({
               {e}
             </button>
           ))}
+          <span className="ios-palette-add" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 17 17">
+              <path d="M8.5 2v13M2 8.5h13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </span>
         </div>
       )}
 
@@ -325,6 +379,23 @@ export function InputScreen({
       >
         Cancel
       </div>
+
+      {showMic && (
+        // Floats in the corner so Cancel stays centred: a mic to start, a red stop while listening, a spinner while
+        // the estimate loads.
+        <button
+          type="button"
+          className="ios-mic"
+          data-phase={voice}
+          tabIndex={onMic ? 0 : -1}
+          disabled={voice === 'estimating'}
+          aria-label={voice === 'idle' ? 'Estimate by voice' : 'Stop and estimate'}
+          onPointerDown={(ev) => ev.stopPropagation()}
+          onClick={onMic}
+        >
+          {voice === 'idle' ? <MicGlyph /> : voice === 'estimating' ? <Spinner /> : <StopGlyph />}
+        </button>
+      )}
 
       {children}
     </div>
@@ -342,6 +413,48 @@ function totals(meals: MealGroup[]) {
   });
 }
 
+// MealLabel's windows, in minutes after midnight.
+const WINDOWS: Record<'Breakfast' | 'Lunch' | 'Dinner', [number, number]> = {
+  Breakfast: [5 * 60 + 30, 10 * 60 + 30],
+  Lunch: [11 * 60 + 30, 14 * 60 + 30],
+  Dinner: [17 * 60 + 30, 21 * 60 + 30],
+};
+
+/** "8 AM", "12:45 PM" → minutes after midnight. */
+function minutesOf(time: string) {
+  const m = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i.exec(time.trim());
+  if (!m) return 0;
+  return ((Number(m[1]) % 12) + (m[3].toUpperCase() === 'PM' ? 12 : 0)) * 60 + Number(m[2] ?? 0);
+}
+
+/**
+ * MealTimeline.groups: Breakfast, Lunch and Dinner show when they have food, or when they're still empty and
+ * nothing later in the day has been logged, as a ready-made slot at the start of their window. An empty day is
+ * just the three slots.
+ */
+export function withEmptySlots(meals: MealGroup[]): MealGroup[] {
+  const has = (label: MealLabel) => meals.some((m) => m.label === label);
+  const latest = Math.max(-1, ...meals.map((m) => minutesOf(m.time)));
+  const slots = (['Breakfast', 'Lunch', 'Dinner'] as const)
+    .filter((label) => {
+      if (has(label)) return false;
+      if (label === 'Breakfast' && (has('Lunch') || has('Dinner'))) return false;
+      if (label === 'Lunch' && has('Dinner')) return false;
+      return latest <= WINDOWS[label][1];
+    })
+    .map((label): MealGroup => ({ id: `slot-${label}`, label, time: '', emojis: [], calories: 0, protein: 0, empty: true }));
+  const at = (m: MealGroup) => (m.empty ? WINDOWS[m.label as keyof typeof WINDOWS][0] : minutesOf(m.time));
+  return [...meals, ...slots].sort((a, b) => at(a) - at(b));
+}
+
+function PlusSmall() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+      <path d="M6.5 1.5v10M1.5 6.5h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function MacroBar({ value, goal, color }: { value: number; goal: number; color: string }) {
   return (
     <div className="ios-bar">
@@ -355,15 +468,60 @@ interface StatsCardProps {
   protein: number;
   expanded?: boolean;
   className?: string;
+  /** The day's carbs and fat, and their goals, when the split isn't the default 60/40. */
+  macros?: { carbs: number; fat: number; carbsGoal: number; fatGoal: number };
+  /** Makes the whole card open and close, as the app's does. */
+  onToggle?: () => void;
 }
 
-export function StatsCard({ calories, protein, expanded = false, className = '' }: StatsCardProps) {
+export function StatsCard({ calories, protein, expanded = false, className = '', macros, onToggle }: StatsCardProps) {
   const over = calories > GOALS.calories;
-  const { carbs, fat } = macroSplit(calories, protein);
+  const split = macroSplit(calories, protein);
   const goalSplit = macroSplit(GOALS.calories, GOALS.protein);
+  const { carbs, fat, carbsGoal, fatGoal } = macros ?? { ...split, carbsGoal: goalSplit.carbs, fatGoal: goalSplit.fat };
+
+  const breakdown = (
+    <div style={{ borderTop: '0.5px solid rgb(60 60 67 / 0.2)', marginTop: 22, marginRight: 8 }}>
+      {[
+        { name: 'Carbs', value: carbs, goal: carbsGoal, color: '#ff9500' },
+        { name: 'Fat', value: fat, goal: fatGoal, color: '#af52de' },
+      ].map((m) => (
+        <div className="ios-macro-row" key={m.name}>
+          <div className="ios-macro-row-head">
+            <span>{m.name}</span>
+            <span className="ios-estimated">
+              <Wand /> Estimated
+            </span>
+            <span>
+              {m.value} / {m.goal} g
+            </span>
+          </div>
+          <MacroBar value={m.value} goal={m.goal} color={m.color} />
+        </div>
+      ))}
+    </div>
+  );
+
+  const toggle = onToggle
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        'aria-expanded': expanded,
+        'aria-label': `Calories ${fmt(calories)} of ${fmt(GOALS.calories)}, protein ${protein} of ${GOALS.protein} grams. ${
+          expanded ? 'Hide' : 'Show'
+        } carbs and fat`,
+        onClick: onToggle,
+        onKeyDown: (ev: { key: string; preventDefault: () => void }) => {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            onToggle();
+          }
+        },
+      }
+    : {};
 
   return (
-    <div className={`ios-card ios-stats ${className}`}>
+    <div className={`ios-card ios-stats ${onToggle ? 'is-toggle' : ''} ${className}`} {...toggle}>
       <div className="ios-stats-row">
         <div className="ios-stat">
           <div className="ios-stat-label">Calories</div>
@@ -385,26 +543,13 @@ export function StatsCard({ calories, protein, expanded = false, className = '' 
         </div>
       </div>
 
-      {expanded && (
-        <div style={{ borderTop: '0.5px solid rgb(60 60 67 / 0.2)', marginTop: 22, marginRight: 8 }}>
-          {[
-            { name: 'Carbs', value: carbs, goal: goalSplit.carbs, color: '#ff9500' },
-            { name: 'Fat', value: fat, goal: goalSplit.fat, color: '#af52de' },
-          ].map((m) => (
-            <div className="ios-macro-row" key={m.name}>
-              <div className="ios-macro-row-head">
-                <span>{m.name}</span>
-                <span className="ios-estimated">
-                  <Wand /> Estimated
-                </span>
-                <span>
-                  {m.value} / {m.goal} g
-                </span>
-              </div>
-              <MacroBar value={m.value} goal={m.goal} color={m.color} />
-            </div>
-          ))}
+      {onToggle ? (
+        // Always there, and eased open and shut, rather than mounted and unmounted.
+        <div className="ios-stats-more" data-open={expanded} aria-hidden={!expanded}>
+          <div>{breakdown}</div>
         </div>
+      ) : (
+        expanded && breakdown
       )}
     </div>
   );
@@ -421,13 +566,28 @@ interface TodayScreenProps {
 
 export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded = false, newId, onAdd }: TodayScreenProps) {
   const t = totals(meals);
+  // An empty slot's row adds a meal, like the + button.
+  const press = onAdd
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        onPointerDown: (ev: { stopPropagation: () => void }) => ev.stopPropagation(),
+        onClick: onAdd,
+        onKeyDown: (ev: { key: string; preventDefault: () => void }) => {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            onAdd();
+          }
+        },
+      }
+    : {};
 
   return (
     <div className="ios-today">
       <div className="ios-today-header">
         <div className="ios-large-title">{title}</div>
         {onTrack && (
-          <span className="ios-badge" style={{ color: '#34c759', background: 'rgb(52 199 89 / 0.16)' }}>
+          <span className="ios-badge" style={{ color: ADHERENCE.on, background: 'rgb(117 189 133 / 0.16)' }}>
             On track <Target />
           </span>
         )}
@@ -440,26 +600,36 @@ export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded =
         <StatsCard calories={t.calories} protein={t.protein} expanded={expanded} />
 
         <div className="ios-meals">
-          {meals.map((m, i) => (
+          {withEmptySlots(meals).map((m, i) => (
             <div key={m.id}>
               <div className="ios-meal-head">
-                <span>
-                  {m.label} - {m.time}
-                </span>
+                {/* An empty slot's header is just its name; there's no time until something's in it. */}
+                <span>{m.empty ? m.label : `${m.label} - ${m.time}`}</span>
                 <span>{i === 0 ? 'Cals' : ''}</span>
                 <span>{i === 0 ? 'Protein' : ''}</span>
                 <span />
               </div>
-              <div className={`ios-meal-row ${m.id === newId ? 'is-new' : ''}`} key={`${m.id}-${m.emojis.length}`}>
-                <span className="emojis">
-                  {m.emojis.map((e, j) => (
-                    <span key={j}>{e}</span>
-                  ))}
-                </span>
-                <span className="cals">{fmt(m.calories)}</span>
-                <span className="protein">{m.protein}g</span>
-                <span className="ios-chevron">{m.emojis.length > 1 ? <ChevronDown size={14} weight={2} /> : <Pencil />}</span>
-              </div>
+              {m.empty ? (
+                <div className="ios-meal-row ios-slot" aria-label={onAdd ? `Add ${m.label}` : undefined} {...press}>
+                  <span>Add</span>
+                  <span />
+                  <span />
+                  <span className="ios-chevron">
+                    <PlusSmall />
+                  </span>
+                </div>
+              ) : (
+                <div className={`ios-meal-row ${m.id === newId ? 'is-new' : ''}`} key={`${m.id}-${m.emojis.length}`}>
+                  <span className="emojis">
+                    {m.emojis.map((e, j) => (
+                      <span key={j}>{e}</span>
+                    ))}
+                  </span>
+                  <span className="cals">{fmt(m.calories)}</span>
+                  <span className="protein">{m.protein}g</span>
+                  <span className="ios-chevron">{m.emojis.length > 1 ? <ChevronDown size={14} weight={2} /> : <Pencil />}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
