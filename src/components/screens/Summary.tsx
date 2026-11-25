@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import type { ReactNode } from 'react';
 import { Segmented } from '../FeatureDemos';
 import { ADHERENCE, GOALS, PROTEIN_BLUE, fmt } from './ios';
 
 /*
-  The Summary tab (WeeklySummaryView): this week at a glance, with how many days landed both goals, the daily
-  averages, and the week day by day, with a ghost of what the days still to come would need for the week to
-  average out at the goal.
+  The Summary tab (WeeklySummaryView), boiled down to its two main parts so the card sits level with its
+  neighbour: how many days landed both goals, day by day, with the On track pill; and the week's chart, with a
+  ghost of what the days still to come would need for the week to average out at the goal.
 
   A sample week, seen on Saturday: Monday to Friday are judged, Saturday is today with lunch logged so far, and
   Sunday is still to come. Wednesday went over on calories and under on protein; the rest landed both.
@@ -32,8 +31,6 @@ const judged = DAYS.slice(0, TODAY);
 const caloriesHit = (d: (typeof DAYS)[number]) => d.calories >= LOW && d.calories <= HIGH;
 const proteinHit = (d: (typeof DAYS)[number]) => d.protein >= FLOOR;
 const hits = judged.filter((d) => caloriesHit(d) && proteinHit(d)).length;
-// GoalAdherence averages logged days only, in whole numbers.
-const average = (metric: 'calories' | 'protein') => Math.trunc(judged.reduce((t, d) => t + d[metric], 0) / judged.length);
 
 /** What each day left would need for the week to average out at the goal (WeeklySummaryView.ghostTarget). */
 const ghost = (metric: 'calories' | 'protein') => {
@@ -52,37 +49,29 @@ export function SummaryCard({ className = '' }: { className?: string }) {
 
   return (
     <div className={`ios-scope w-full max-w-[380px] text-left ${className}`}>
-      <div className="flex items-baseline gap-2.5 px-1">
-        <p className="text-[28px] leading-none font-bold tracking-[-0.02em]">This week</p>
-        <span className="ios-badge translate-y-[3px] self-end" style={{ color: ADHERENCE.on, background: 'rgb(52 199 89 / 0.16)' }}>
-          On track
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <circle cx="8" cy="8" r="6.6" stroke="currentColor" strokeWidth="1.6" />
-            <circle cx="8" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.6" />
-            <circle cx="8" cy="8" r="1.1" fill="currentColor" />
-          </svg>
-        </span>
-      </div>
-      <p className="mt-1.5 px-1 text-[14px] text-muted">16 Nov – 22 Nov</p>
-
-      <div className="mt-3 rounded-[22px] bg-white p-4 shadow-[0_10px_30px_-20px_rgb(0_0_0/0.3)]">
-        <p className="flex items-baseline gap-1.5">
-          <span className="font-rounded text-[38px] leading-none font-bold tabular-nums">{hits}</span>
-          <span className="text-[19px] font-semibold text-muted">of {judged.length} days</span>
-        </p>
-        <ol className="mt-3.5 grid grid-cols-7" aria-label="Each day this week">
+      <div className="rounded-[22px] bg-white p-4 shadow-[0_10px_30px_-20px_rgb(0_0_0/0.3)]">
+        <div className="flex items-center justify-between gap-3">
+          <p className="flex items-baseline gap-1.5">
+            <span className="font-rounded text-[34px] leading-none font-bold tabular-nums">{hits}</span>
+            <span className="text-[18px] font-semibold text-muted">of {judged.length} days</span>
+          </p>
+          <span className="ios-badge" style={{ color: ADHERENCE.on, background: 'rgb(52 199 89 / 0.16)' }}>
+            On track
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.6" stroke="currentColor" strokeWidth="1.6" />
+              <circle cx="8" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.6" />
+              <circle cx="8" cy="8" r="1.1" fill="currentColor" />
+            </svg>
+          </span>
+        </div>
+        <ol className="mt-3 grid grid-cols-7" aria-label="Each day this week">
           {DAYS.map((d, i) => (
             <DayMarker key={d.day} index={i} day={d} />
           ))}
         </ol>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Average title="Calories" color={ADHERENCE.on} icon={<Flame />} value={fmt(average('calories'))} unit="kcal" />
-        <Average title="Protein" color={PROTEIN_BLUE} icon={<Dumbbell />} value={fmt(average('protein'))} unit="g" />
-      </div>
-
-      <div className="mt-3 rounded-[22px] bg-white p-4 shadow-[0_10px_30px_-20px_rgb(0_0_0/0.3)]">
+      <div className="mt-2.5 rounded-[22px] bg-white p-4 shadow-[0_10px_30px_-20px_rgb(0_0_0/0.3)]">
         <Segmented label="Chart" options={METRICS} value={metric} onChange={setMetric} />
         <WeekChart metric={metric} />
       </div>
@@ -150,22 +139,6 @@ function GoalLine({ over }: { over: boolean }) {
   );
 }
 
-function Average({ title, color, icon, value, unit }: { title: string; color: string; icon: ReactNode; value: string; unit: string }) {
-  return (
-    <div className="rounded-[22px] bg-white p-3.5 shadow-[0_10px_30px_-20px_rgb(0_0_0/0.3)]">
-      <p className="flex items-center gap-1.5 text-[15px] font-semibold" style={{ color }}>
-        {icon}
-        {title}
-      </p>
-      <p className="mt-2 flex items-baseline gap-[3px]">
-        <span className="font-rounded text-[24px] leading-tight font-bold tabular-nums">{value}</span>
-        <span className="text-[14px] font-semibold text-muted">{unit}</span>
-      </p>
-      <p className="text-[12px] text-muted">daily average</p>
-    </div>
-  );
-}
-
 /** The week's bars against the goal's band, the days still to come drawn as ghosts with what they'd need. Like the
     app's chart, switching swaps the bars straight over rather than animating them. */
 function WeekChart({ metric }: { metric: Metric }) {
@@ -179,7 +152,7 @@ function WeekChart({ metric }: { metric: Metric }) {
   const ticks = metric === 'calories' ? [0, 1000, 2000, 3000] : [0, 50, 100, 150, 200];
 
   const W = 330;
-  const H = 190;
+  const H = 136;
   const left = 34;
   const bottom = 22;
   const y = (v: number) => H - bottom - ((H - bottom - 4) * v) / top;
@@ -192,7 +165,7 @@ function WeekChart({ metric }: { metric: Metric }) {
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className="mt-3.5 block w-full"
+      className="mt-3 block w-full"
       role="img"
       aria-label={
         metric === 'calories'
@@ -243,29 +216,6 @@ function WeekChart({ metric }: { metric: Metric }) {
         );
       })}
       <line x1={left} x2={W} y1={y(goal)} y2={y(goal)} stroke="#8a8a8e" strokeWidth="1" strokeDasharray="4 3" />
-    </svg>
-  );
-}
-
-function Flame() {
-  return (
-    <svg width="13" height="15" viewBox="0 0 13 15" aria-hidden="true">
-      <path
-        d="M7 .6c.5 2.2-.2 3.8-1.4 5.1-.6-.6-1-1.4-1-2.4C2.4 5 1 7.2 1 9.5c0 3 2.5 5.1 5.6 5.1s5.6-2.1 5.6-5.1c0-2.1-1-3.7-2.1-4.9-.1 1-.5 1.9-1.2 2.5.3-2.6-.8-4.6-1.9-6.5z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function Dumbbell() {
-  return (
-    <svg width="17" height="11" viewBox="0 0 17 11" aria-hidden="true">
-      <rect x="0.6" y="3.4" width="2.4" height="4.2" rx="1" fill="currentColor" />
-      <rect x="3.4" y="0.8" width="2.8" height="9.4" rx="1.2" fill="currentColor" />
-      <rect x="6" y="4.6" width="5" height="1.8" fill="currentColor" />
-      <rect x="10.8" y="0.8" width="2.8" height="9.4" rx="1.2" fill="currentColor" />
-      <rect x="14" y="3.4" width="2.4" height="4.2" rx="1" fill="currentColor" />
     </svg>
   );
 }
