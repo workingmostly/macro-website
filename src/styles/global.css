@@ -244,6 +244,48 @@
     }
   }
 
+  /* The Macro+ glow from the app's PlusHeroIcon, for an 80px icon: a green circle and a blue one (the fork's and
+     knife's colours, green on the left) overlapping in a 1.9 × 1.1 box, blurred by 0.36 of the icon's size, and
+     breathing between 32% and 45% opacity and 96% and 106% scale every 2.4s. Still, at its resting look, with
+     reduced motion. */
+  .plus-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    justify-content: center;
+    width: 152px;
+    height: 88px;
+    translate: -50% -50%;
+    scale: 0.96;
+    opacity: 0.32;
+    filter: blur(29px);
+    pointer-events: none;
+    animation: plus-breathe 2.4s ease-in-out infinite alternate;
+  }
+  .plus-glow span {
+    flex: none;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--color-ios-green);
+  }
+  .plus-glow span + span {
+    margin-left: -28px;
+    background: var(--color-ios-blue);
+  }
+  @keyframes plus-breathe {
+    to {
+      scale: 1.06;
+      opacity: 0.45;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plus-glow {
+      animation: none;
+    }
+  }
+
   /* Struck-through words in the "no" marquee */
   .strike {
     position: relative;
