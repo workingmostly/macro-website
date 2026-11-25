@@ -21,9 +21,9 @@ const MACRO_STEPS = [
   { field: 'protein' as const, value: 35, caption: 'Drag to 35 g protein' },
 ];
 const MACRO_DAY: MealGroup[] = [
-  { id: 'b', label: 'Breakfast', time: '8 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
-  { id: 'l', label: 'Lunch', time: '1 PM', emojis: ['🥪', '🍎'], calories: 620, protein: 41 },
-  { id: 'd', label: 'Dinner', time: '7 PM', emojis: ['🍽️'], calories: 500, protein: 35 },
+  { id: 'b', label: 'Breakfast', time: '8:05 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
+  { id: 'l', label: 'Lunch', time: '1:10 PM', emojis: ['🥪', '🍎'], calories: 620, protein: 41 },
+  { id: 'd', label: 'Dinner', time: '7:30 PM', emojis: ['🍽️'], calories: 500, protein: 35 },
 ];
 
 const clamp = (v: number) => Math.min(1, Math.max(0, v));

@@ -30,8 +30,8 @@ const STEPS = [
 
 const CALORIES = 520;
 const PROTEIN = 38;
-const BREAKFAST: MealGroup = { id: 'b', label: 'Breakfast', time: '8 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 };
-const LUNCH: MealGroup = { id: 'l', label: 'Lunch', time: '1 PM', emojis: ['🥪'], calories: CALORIES, protein: PROTEIN };
+const BREAKFAST: MealGroup = { id: 'b', label: 'Breakfast', time: '8:05 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 };
+const LUNCH: MealGroup = { id: 'l', label: 'Lunch', time: '1:05 PM', emojis: ['🥪'], calories: CALORIES, protein: PROTEIN };
 
 // Timeline, in ms: drag calories, tap; drag protein, tap; the meal lands; hold; start again.
 const DRAG = 1400;

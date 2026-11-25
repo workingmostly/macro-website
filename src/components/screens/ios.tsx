@@ -1,4 +1,8 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from 'react';
+import { DragScale, SCALES } from './scales';
+import { MicGlyph, VoiceBar, type BarMode, type Script, type VoicePhase } from './Voice';
+
+export { DragScale, SCALES };
 
 /* ────────────────────────────────────────────────────────────
    Shared model + maths, mirroring the app's Support/ folder.
@@ -7,13 +11,18 @@ import type { CSSProperties, ReactNode } from 'react';
 export type MealLabel = 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
 export type Field = 'calories' | 'protein' | 'emoji';
 
+/** A meal on the day list: one entry, or several of the same meal grouped under one row. */
 export interface MealGroup {
   id: string;
   label: MealLabel;
+  /** The first entry's own time, as the row shows it ("8:05 AM"). */
   time: string;
+  /** One per entry. */
   emojis: string[];
   calories: number;
   protein: number;
+  /** A Breakfast, Lunch or Dinner slot with nothing in it yet (see withEmptySlots). */
+  empty?: boolean;
 }
 
 /** The app's default goals. */
@@ -24,6 +33,10 @@ export const CARBS_SPLIT = 0.6;
 export const PROTEIN_BLUE = '#007aff';
 export const FILL_MAX: Record<'calories' | 'protein', number> = { calories: 800, protein: 80 };
 
+/** AdherenceTint: the same system green and orange as the calories bar and the carbs row. */
+export const ADHERENCE = { on: '#34c759', off: '#ff9500' };
+
+/** Recents first, as FoodEmoji.ordered() puts them, then the app's starter chips. */
 export const EMOJI_PALETTE = ['🍽️', '🍣', '🍗', '🥗', '🍕', '🍔', '🥪', '🍎'];
 
 const nf = new Intl.NumberFormat('en-GB');
@@ -53,47 +66,6 @@ export function calorieAccent(calories: number): string {
   return `rgb(${last[0]} ${last[1]} ${last[2]})`;
 }
 
-/** DragScale.swift — piecewise-linear "gearing" from drag distance to value. */
-export class DragScale {
-  constructor(private zones: { span: number; sensitivity: number }[]) {}
-
-  position(value: number): number {
-    let position = 0;
-    let remaining = Math.max(0, value);
-    for (const zone of this.zones) {
-      if (remaining <= zone.span) return position + remaining / zone.sensitivity;
-      position += zone.span / zone.sensitivity;
-      remaining -= zone.span;
-    }
-    return position + remaining / this.zones[this.zones.length - 1].sensitivity;
-  }
-
-  value(position: number): number {
-    let remaining = Math.max(0, position);
-    let value = 0;
-    for (const zone of this.zones) {
-      const span = zone.span / zone.sensitivity;
-      if (remaining <= span) return value + remaining * zone.sensitivity;
-      remaining -= span;
-      value += zone.span;
-    }
-    return value + remaining * this.zones[this.zones.length - 1].sensitivity;
-  }
-}
-
-export const SCALES = {
-  calories: new DragScale([
-    { span: 150, sensitivity: 0.7 },
-    { span: 450, sensitivity: 1.1 },
-    { span: 400, sensitivity: 2.2 },
-    { span: 3000, sensitivity: 4.0 },
-  ]),
-  protein: new DragScale([
-    { span: 80, sensitivity: 0.12 },
-    { span: 80, sensitivity: 0.32 },
-  ]),
-};
-
 export function macroSplit(calories: number, protein: number) {
   const rest = Math.max(0, calories - 4 * protein);
   return {
@@ -114,13 +86,6 @@ export function ChevronDown({ size = 10, weight = 2.2 }: { size?: number; weight
   );
 }
 
-function Pencil() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M3 17l1-4L14 3l3 3L7 16l-4 1z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function Gear() {
   return (
@@ -136,15 +101,6 @@ function Gear() {
   );
 }
 
-function Target() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="6.6" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="8" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="8" cy="8" r="1.1" fill="currentColor" />
-    </svg>
-  );
-}
 
 export function Wand() {
   return (
@@ -243,6 +199,22 @@ interface InputScreenProps {
   palette?: string[];
   onPickEmoji?: (emoji: string) => void;
   onCancel?: () => void;
+  /**
+   * The voice estimate's mic, which the app shows on the first step on an iPhone with Apple Intelligence. On by
+   * default, as on any current iPhone.
+   */
+  mic?: boolean;
+  /** Listening or estimating: the mic has opened into its bar, which takes Cancel's place. */
+  voice?: VoicePhase;
+  /** What the made-up speaker is saying while the bar listens. */
+  script?: Script;
+  onMic?: () => void;
+  /** A tap on the open bar, which finishes listening (the entry screen's mic is tap-to-talk). */
+  onBar?: () => void;
+  /** What the voice estimate took the meal to be, shown under the number until a value is changed by hand. */
+  estimate?: string | null;
+  /** Draws the bar's waveform as a still (reduced motion). */
+  stillWave?: boolean;
   children?: ReactNode;
 }
 
@@ -257,11 +229,21 @@ export function InputScreen({
   palette = EMOJI_PALETTE,
   onPickEmoji,
   onCancel,
+  mic = true,
+  voice = 'idle',
+  script,
+  onMic,
+  onBar,
+  estimate = null,
+  stillWave = false,
   children,
 }: InputScreenProps) {
   const isNumber = field !== 'emoji';
   const accent = field === 'calories' ? calorieAccent(value) : field === 'protein' ? PROTEIN_BLUE : '#8a8a8e';
   const fill = isNumber ? Math.min(1, Math.max(0, value / FILL_MAX[field])) : 0;
+  const barOpen = voice !== 'idle' && !!script;
+  // InputView.showsVoiceButton: only on the first step, so the guess fills everything before anything's confirmed.
+  const showMic = mic && !barOpen && stepIndex === 0 && isNumber;
 
   return (
     <div className="ios-input" style={{ '--accent': accent } as CSSProperties}>
@@ -284,7 +266,8 @@ export function InputScreen({
         </b>
       </div>
 
-      <div className="ios-readout">
+      {/* Stays put while listening: the number holds until the estimate arrives, then glides to it. */}
+      <div className="ios-readout" data-field={field}>
         <div className="ios-caption" style={{ color: accent }}>
           {field === 'calories' ? 'CALORIES' : field === 'protein' ? 'PROTEIN' : 'FOOD'}
         </div>
@@ -292,6 +275,7 @@ export function InputScreen({
           <>
             <div className="ios-number">{fmt(value)}</div>
             <div className="ios-unit">{field === 'calories' ? 'Kcal' : 'Grams'}</div>
+            {estimate && <div className="ios-hint">Estimated · {estimate}</div>}
           </>
         ) : (
           <div className="ios-emoji-big">{emoji}</div>
@@ -313,18 +297,50 @@ export function InputScreen({
               {e}
             </button>
           ))}
+          <span className="ios-palette-add" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 17 17">
+              <path d="M8.5 2v13M2 8.5h13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </span>
         </div>
       )}
 
-      <div
-        className="ios-cancel"
-        role={onCancel ? 'button' : undefined}
-        tabIndex={onCancel ? 0 : undefined}
-        onPointerDown={onCancel ? (ev) => ev.stopPropagation() : undefined}
-        onClick={onCancel}
-      >
-        Cancel
-      </div>
+      {/* The voice bar opens across Cancel's spot, so Cancel steps aside while it's out. */}
+      {!barOpen && (
+        <div
+          className="ios-cancel"
+          role={onCancel ? 'button' : undefined}
+          tabIndex={onCancel ? 0 : undefined}
+          onPointerDown={onCancel ? (ev) => ev.stopPropagation() : undefined}
+          onClick={onCancel}
+        >
+          Cancel
+        </div>
+      )}
+
+      {showMic && (
+        // Where the day list's plus sits, so nothing at the bottom moves as this screen fades in over it.
+        <button
+          type="button"
+          className="ios-mic ios-glass"
+          tabIndex={onMic ? 0 : -1}
+          aria-label="Estimate by voice"
+          onPointerDown={(ev) => ev.stopPropagation()}
+          onClick={onMic}
+        >
+          <MicGlyph />
+        </button>
+      )}
+
+      {barOpen && script && (
+        <VoiceBar
+          mode={voice === 'estimating' ? 'estimating' : 'listening'}
+          script={script}
+          handsFree
+          stillWave={stillWave}
+          onPress={voice === 'listening' ? onBar : undefined}
+        />
+      )}
 
       {children}
     </div>
@@ -342,6 +358,110 @@ function totals(meals: MealGroup[]) {
   });
 }
 
+// MealLabel's windows, in minutes after midnight.
+const WINDOWS: Record<'Breakfast' | 'Lunch' | 'Dinner', [number, number]> = {
+  Breakfast: [5 * 60 + 30, 10 * 60 + 30],
+  Lunch: [11 * 60 + 30, 14 * 60 + 30],
+  Dinner: [17 * 60 + 30, 21 * 60 + 30],
+};
+
+/** "8 AM", "12:45 PM" → minutes after midnight. */
+function minutesOf(time: string) {
+  const m = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i.exec(time.trim());
+  if (!m) return 0;
+  return ((Number(m[1]) % 12) + (m[3].toUpperCase() === 'PM' ? 12 : 0)) * 60 + Number(m[2] ?? 0);
+}
+
+/**
+ * MealTimeline.groups: Breakfast, Lunch and Dinner (the default meal slots) are always on the day, as ready-made
+ * "Add" slots at the start of their window until something's logged in them. Snacks sit between them by time.
+ */
+export function withEmptySlots(meals: MealGroup[]): MealGroup[] {
+  const slots = (['Breakfast', 'Lunch', 'Dinner'] as const)
+    .filter((label) => !meals.some((m) => m.label === label))
+    .map((label): MealGroup => ({ id: `slot-${label}`, label, time: '', emojis: [], calories: 0, protein: 0, empty: true }));
+  const at = (m: MealGroup) => (m.empty ? WINDOWS[m.label as keyof typeof WINDOWS][0] : minutesOf(m.time));
+  return [...meals, ...slots].sort((a, b) => at(a) - at(b));
+}
+
+/**
+ * A group's emojis clustered into the space one emoji takes on an entry row, so group and entry times line up:
+ * two on a diagonal, three in a triangle pointing into the top-left corner, four or more in a 2×2 grid with "+N"
+ * in the last cell past four. As TodayView.emojiGridTile draws it, a little larger than the row's 28pt line.
+ */
+function EmojiTile({ emojis }: { emojis: string[] }) {
+  const tile = 32;
+  const scale = tile / 27;
+  const spots: [number, number][] =
+    emojis.length === 2
+      ? [
+          [0.35, 0.35],
+          [0.65, 0.65],
+        ]
+      : [
+          [0.35, 0.35],
+          [0.7, 0.45],
+          [0.45, 0.7],
+        ];
+  const overflow = emojis.length > 4 ? emojis.length - 3 : 0;
+  const grid = emojis.length >= 4;
+
+  return (
+    <span className="ios-emoji-tile" aria-hidden="true">
+      {grid ? (
+        <span className="grid" style={{ fontSize: 9 * scale }}>
+          {(overflow ? emojis.slice(0, 3) : emojis.slice(0, 4)).map((e, i) => (
+            <span key={i}>{e}</span>
+          ))}
+          {overflow > 0 && <span className="more">+{overflow}</span>}
+        </span>
+      ) : (
+        emojis.slice(0, 3).map((e, i) => (
+          <span
+            key={i}
+            className="spot"
+            style={{
+              left: spots[i][0] * tile,
+              top: spots[i][1] * tile,
+              fontSize: (emojis.length === 2 ? 11.5 : 10) * scale,
+            }}
+          >
+            {e}
+          </span>
+        ))
+      )}
+    </span>
+  );
+}
+
+/** SF Symbols book.fill and chart.bar.fill, for the Log and Summary tabs. */
+function BookGlyph() {
+  return (
+    <svg width="25" height="22" viewBox="0 0 25 22" aria-hidden="true">
+      <path d="M11.6 3.6C9.4 2.1 6.4 1.5 2.9 1.9 2 2 1.4 2.7 1.4 3.6v13.6c0 .9.8 1.6 1.7 1.5 3.2-.4 6 .2 8.5 1.8V3.6z" />
+      <path d="M13.4 3.6c2.2-1.5 5.2-2.1 8.7-1.7.9.1 1.5.8 1.5 1.7v13.6c0 .9-.8 1.6-1.7 1.5-3.2-.4-6 .2-8.5 1.8V3.6z" />
+    </svg>
+  );
+}
+
+function ChartGlyph() {
+  return (
+    <svg width="23" height="22" viewBox="0 0 23 22" aria-hidden="true">
+      <rect x="1.5" y="11" width="5.4" height="9.5" rx="1.6" />
+      <rect x="8.8" y="6" width="5.4" height="14.5" rx="1.6" />
+      <rect x="16.1" y="1.5" width="5.4" height="19" rx="1.6" />
+    </svg>
+  );
+}
+
+function PlusSmall() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+      <path d="M6.5 1.5v10M1.5 6.5h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function MacroBar({ value, goal, color }: { value: number; goal: number; color: string }) {
   return (
     <div className="ios-bar">
@@ -355,15 +475,60 @@ interface StatsCardProps {
   protein: number;
   expanded?: boolean;
   className?: string;
+  /** The day's carbs and fat, and their goals, when the split isn't the default 60/40. */
+  macros?: { carbs: number; fat: number; carbsGoal: number; fatGoal: number };
+  /** Makes the whole card open and close, as the app's does. */
+  onToggle?: () => void;
 }
 
-export function StatsCard({ calories, protein, expanded = false, className = '' }: StatsCardProps) {
+export function StatsCard({ calories, protein, expanded = false, className = '', macros, onToggle }: StatsCardProps) {
   const over = calories > GOALS.calories;
-  const { carbs, fat } = macroSplit(calories, protein);
+  const split = macroSplit(calories, protein);
   const goalSplit = macroSplit(GOALS.calories, GOALS.protein);
+  const { carbs, fat, carbsGoal, fatGoal } = macros ?? { ...split, carbsGoal: goalSplit.carbs, fatGoal: goalSplit.fat };
+
+  const breakdown = (
+    <div style={{ borderTop: '0.5px solid rgb(60 60 67 / 0.2)', marginTop: 22, marginRight: 8 }}>
+      {[
+        { name: 'Carbs', value: carbs, goal: carbsGoal, color: '#ff9500' },
+        { name: 'Fat', value: fat, goal: fatGoal, color: '#af52de' },
+      ].map((m) => (
+        <div className="ios-macro-row" key={m.name}>
+          <div className="ios-macro-row-head">
+            <span>{m.name}</span>
+            <span className="ios-estimated">
+              <Wand /> Estimated
+            </span>
+            <span>
+              {m.value} / {m.goal} g
+            </span>
+          </div>
+          <MacroBar value={m.value} goal={m.goal} color={m.color} />
+        </div>
+      ))}
+    </div>
+  );
+
+  const toggle = onToggle
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        'aria-expanded': expanded,
+        'aria-label': `Calories ${fmt(calories)} of ${fmt(GOALS.calories)}, protein ${protein} of ${GOALS.protein} grams. ${
+          expanded ? 'Hide' : 'Show'
+        } carbs and fat`,
+        onClick: onToggle,
+        onKeyDown: (ev: { key: string; preventDefault: () => void }) => {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            onToggle();
+          }
+        },
+      }
+    : {};
 
   return (
-    <div className={`ios-card ios-stats ${className}`}>
+    <div className={`ios-card ios-stats ${onToggle ? 'is-toggle' : ''} ${className}`} {...toggle}>
       <div className="ios-stats-row">
         <div className="ios-stat">
           <div className="ios-stat-label">Calories</div>
@@ -385,52 +550,74 @@ export function StatsCard({ calories, protein, expanded = false, className = '' 
         </div>
       </div>
 
-      {expanded && (
-        <div style={{ borderTop: '0.5px solid rgb(60 60 67 / 0.2)', marginTop: 22, marginRight: 8 }}>
-          {[
-            { name: 'Carbs', value: carbs, goal: goalSplit.carbs, color: '#ff9500' },
-            { name: 'Fat', value: fat, goal: goalSplit.fat, color: '#af52de' },
-          ].map((m) => (
-            <div className="ios-macro-row" key={m.name}>
-              <div className="ios-macro-row-head">
-                <span>{m.name}</span>
-                <span className="ios-estimated">
-                  <Wand /> Estimated
-                </span>
-                <span>
-                  {m.value} / {m.goal} g
-                </span>
-              </div>
-              <MacroBar value={m.value} goal={m.goal} color={m.color} />
-            </div>
-          ))}
+      {onToggle ? (
+        // Always there, and eased open and shut, rather than mounted and unmounted.
+        <div className="ios-stats-more" data-open={expanded} aria-hidden={!expanded}>
+          <div>{breakdown}</div>
         </div>
+      ) : (
+        expanded && breakdown
       )}
     </div>
   );
 }
 
+/** The plus held open into its voice bar on Today. */
+export interface PlusBar {
+  mode: BarMode;
+  script: Script;
+  cancel?: 'slide' | 'armed' | null;
+  confirmation?: { emoji?: string; title: string; detail?: string } | null;
+  stillWave?: boolean;
+}
+
 interface TodayScreenProps {
   meals: MealGroup[];
   title?: string;
-  onTrack?: boolean;
   expanded?: boolean;
   newId?: string | null;
+  /** A tap on the plus, or on an empty slot's row. */
   onAdd?: () => void;
+  /** Pointer handlers for the plus, so it can be held to talk. Replace its plain tap when given. */
+  plusHandlers?: Partial<Pick<HTMLAttributes<HTMLDivElement>, 'onPointerDown' | 'onPointerMove' | 'onPointerUp' | 'onPointerCancel'>>;
+  /** The plus being held, before it opens. */
+  pressing?: boolean;
+  bar?: PlusBar | null;
 }
 
-export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded = false, newId, onAdd }: TodayScreenProps) {
+export function TodayScreen({
+  meals,
+  title = 'Today',
+  expanded = false,
+  newId,
+  onAdd,
+  plusHandlers,
+  pressing = false,
+  bar = null,
+}: TodayScreenProps) {
   const t = totals(meals);
+  const keys = (ev: KeyboardEvent<HTMLDivElement>) => {
+    if (onAdd && (ev.key === 'Enter' || ev.key === ' ')) {
+      ev.preventDefault();
+      onAdd();
+    }
+  };
+  // An empty slot's row adds a meal into that slot, like the plus.
+  const press = onAdd
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        onPointerDown: (ev: PointerEvent<HTMLDivElement>) => ev.stopPropagation(),
+        onClick: onAdd,
+        onKeyDown: keys,
+      }
+    : {};
 
   return (
     <div className="ios-today">
+      {/* How the week is going lives on the Summary tab now, so the title row is just the title and the cog. */}
       <div className="ios-today-header">
         <div className="ios-large-title">{title}</div>
-        {onTrack && (
-          <span className="ios-badge" style={{ color: '#34c759', background: 'rgb(52 199 89 / 0.16)' }}>
-            On track <Target />
-          </span>
-        )}
         <span className="ios-glass-btn">
           <Gear />
         </span>
@@ -440,48 +627,77 @@ export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded =
         <StatsCard calories={t.calories} protein={t.protein} expanded={expanded} />
 
         <div className="ios-meals">
-          {meals.map((m, i) => (
+          {withEmptySlots(meals).map((m, i) => (
             <div key={m.id}>
+              {/* Just the meal's name: every entry shows its own time on its row. */}
               <div className="ios-meal-head">
-                <span>
-                  {m.label} - {m.time}
-                </span>
+                <span>{m.label === 'Snack' && m.emojis.length > 1 ? 'Snacks' : m.label}</span>
                 <span>{i === 0 ? 'Cals' : ''}</span>
                 <span>{i === 0 ? 'Protein' : ''}</span>
                 <span />
               </div>
-              <div className={`ios-meal-row ${m.id === newId ? 'is-new' : ''}`} key={`${m.id}-${m.emojis.length}`}>
-                <span className="emojis">
-                  {m.emojis.map((e, j) => (
-                    <span key={j}>{e}</span>
-                  ))}
-                </span>
-                <span className="cals">{fmt(m.calories)}</span>
-                <span className="protein">{m.protein}g</span>
-                <span className="ios-chevron">{m.emojis.length > 1 ? <ChevronDown size={14} weight={2} /> : <Pencil />}</span>
-              </div>
+              {m.empty ? (
+                <div className="ios-meal-row ios-slot" aria-label={onAdd ? `Add ${m.label}` : undefined} {...press}>
+                  <span>Add</span>
+                  <span />
+                  <span />
+                  <span className="ios-chevron">
+                    <PlusSmall />
+                  </span>
+                </div>
+              ) : (
+                <div className={`ios-meal-row ${m.id === newId ? 'is-new' : ''}`} key={`${m.id}-${m.emojis.length}`}>
+                  <span className="lead">
+                    {m.emojis.length > 1 ? <EmojiTile emojis={m.emojis} /> : <span className="emoji">{m.emojis[0]}</span>}
+                    <span className="time">{m.time}</span>
+                  </span>
+                  <span className="cals">{m.calories}</span>
+                  <span className="protein">{m.protein}g</span>
+                  {/* A group opens to its entries; a single entry's row opens the editor, so it has no icon. */}
+                  <span className="ios-chevron">{m.emojis.length > 1 && <ChevronDown size={14} weight={2} />}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
+      {/* One bar along the bottom: Log and Summary on the left, the plus on the right, on the same line. The tabs
+          give way when the plus opens into its voice bar. */}
+      <div className="ios-tabbar ios-glass" data-hidden={!!bar} aria-hidden="true">
+        <span data-on="true">
+          <BookGlyph />
+          Log
+        </span>
+        <span>
+          <ChartGlyph />
+          Summary
+        </span>
+      </div>
+
+      {bar && (
+        <VoiceBar
+          mode={bar.mode}
+          script={bar.script}
+          cancel={bar.cancel}
+          confirmation={bar.confirmation}
+          stillWave={bar.stillWave}
+        />
+      )}
+
+      {/* Stays mounted under the open bar, so a finger holding it keeps hold of it. */}
       <div
         className="ios-fab"
+        data-hidden={!!bar}
+        data-pressing={pressing}
         role={onAdd ? 'button' : undefined}
-        aria-label={onAdd ? 'Add a meal' : undefined}
+        aria-label={onAdd ? 'Add meal. Hold to log a meal by voice' : undefined}
         tabIndex={onAdd ? 0 : undefined}
-        onPointerDown={onAdd ? (ev) => ev.stopPropagation() : undefined}
-        onClick={onAdd}
-        onKeyDown={
-          onAdd
-            ? (ev) => {
-                if (ev.key === 'Enter' || ev.key === ' ') {
-                  ev.preventDefault();
-                  onAdd();
-                }
-              }
-            : undefined
-        }
+        onKeyDown={onAdd ? keys : undefined}
+        {...(plusHandlers ?? {
+          onPointerDown: onAdd ? (ev: PointerEvent<HTMLDivElement>) => ev.stopPropagation() : undefined,
+          onClick: onAdd,
+        })}
       >
         <Plus />
       </div>
@@ -494,8 +710,8 @@ export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded =
    ──────────────────────────────────────────────────────────── */
 
 export const SAMPLE_DAY: MealGroup[] = [
-  { id: 'b', label: 'Breakfast', time: '8 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
-  { id: 'l', label: 'Lunch', time: '1 PM', emojis: ['🥪', '🍎'], calories: 620, protein: 41 },
-  { id: 's', label: 'Snack', time: '4 PM', emojis: ['🍫'], calories: 210, protein: 20 },
-  { id: 'd', label: 'Dinner', time: '7 PM', emojis: ['🍗', '🍟'], calories: 780, protein: 58 },
+  { id: 'b', label: 'Breakfast', time: '8:05 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
+  { id: 'l', label: 'Lunch', time: '1:10 PM', emojis: ['🥪', '🍎'], calories: 620, protein: 41 },
+  { id: 's', label: 'Snack', time: '4:20 PM', emojis: ['🍫'], calories: 210, protein: 20 },
+  { id: 'd', label: 'Dinner', time: '7:15 PM', emojis: ['🍗', '🍟'], calories: 780, protein: 58 },
 ];
