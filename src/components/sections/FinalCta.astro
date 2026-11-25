@@ -40,3 +40,13 @@ import { site } from '../../config';
     </div>
   </div>
 </section>
+
+<script>
+  // The glow only breathes while it's on screen, since an animation left running out of sight still costs work on
+  // every frame.
+  const glow = document.querySelector<HTMLElement>('.plus-glow');
+  if (glow) {
+    const io = new IntersectionObserver((entries) => glow.toggleAttribute('data-on', entries[entries.length - 1].isIntersecting));
+    io.observe(glow);
+  }
+</script>

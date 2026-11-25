@@ -247,32 +247,52 @@
   /* The Macro+ glow from the app's PlusHeroIcon, for an 80px icon: a green circle and a blue one (the fork's and
      knife's colours, green on the left) overlapping in a 1.9 × 1.1 box, blurred by 0.36 of the icon's size, and
      breathing between 32% and 45% opacity and 96% and 106% scale every 2.4s. Still, at its resting look, with
-     reduced motion. */
+     reduced motion. The 29px blur is baked into gradients, each circle's falloff once blurred, because a blurred
+     layer that animates has its blur redone on every frame. */
   .plus-glow {
     position: absolute;
     top: 50%;
     left: 50%;
-    display: flex;
-    justify-content: center;
-    width: 152px;
-    height: 88px;
+    width: 320px;
+    height: 260px;
     translate: -50% -50%;
     scale: 0.96;
     opacity: 0.32;
-    filter: blur(29px);
     pointer-events: none;
     animation: plus-breathe 2.4s ease-in-out infinite alternate;
   }
   .plus-glow span {
-    flex: none;
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    background: var(--color-ios-green);
+    --c: 52 199 89;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(
+      closest-side,
+      rgb(var(--c) / 0.684) 0px,
+      rgb(var(--c) / 0.662) 10px,
+      rgb(var(--c) / 0.601) 20px,
+      rgb(var(--c) / 0.51) 30px,
+      rgb(var(--c) / 0.403) 40px,
+      rgb(var(--c) / 0.294) 50px,
+      rgb(var(--c) / 0.197) 60px,
+      rgb(var(--c) / 0.121) 70px,
+      rgb(var(--c) / 0.068) 80px,
+      rgb(var(--c) / 0.034) 90px,
+      rgb(var(--c) / 0.016) 100px,
+      rgb(var(--c) / 0.0065) 110px,
+      rgb(var(--c) / 0.0024) 120px,
+      rgb(var(--c) / 0) 130px
+    );
   }
+  /* 60px apart, the blue over the green. */
   .plus-glow span + span {
-    margin-left: -28px;
-    background: var(--color-ios-blue);
+    --c: 0 122 255;
+    left: 60px;
+  }
+  .js .plus-glow:not([data-on]) {
+    animation-play-state: paused;
   }
   @keyframes plus-breathe {
     to {
@@ -574,8 +594,6 @@
     border-radius: 22px;
     border: 0.5px solid rgb(0 0 0 / 0.1);
     background: rgb(242 242 247 / 0.72);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     font-size: 17px;
     font-weight: 500;
     color: #000;
@@ -595,8 +613,6 @@
     border-radius: 999px;
     background: rgb(252 252 253 / 0.6);
     box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.04);
-    backdrop-filter: blur(20px) saturate(1.6);
-    -webkit-backdrop-filter: blur(20px) saturate(1.6);
     color: #8a8a8e;
     font-size: 13px;
     font-weight: 500;
@@ -605,15 +621,15 @@
     animation: ios-fade 250ms ease both;
   }
 
-  /* Liquid Glass, untinted: the mic, the tab bar and the cancel hint. */
+  /* Liquid Glass, untinted: the mic and the tab bar. Like the Cancel capsule and the estimate's hint, it has no
+     backdrop blur: over the plain screen behind it a blur looks no different, and Safari redraws every one as the
+     page scrolls. */
   .ios-glass {
     background: rgb(255 255 255 / 0.74);
     box-shadow:
       0 0 0 0.5px rgb(0 0 0 / 0.07),
       0 8px 24px rgb(0 0 0 / 0.12),
       inset 0 1px 0 rgb(255 255 255 / 0.9);
-    backdrop-filter: blur(16px) saturate(1.8);
-    -webkit-backdrop-filter: blur(16px) saturate(1.8);
   }
   /* FloatingButtonMetrics: 58pt round, 20pt in from the right and 20pt above the home indicator area. */
   .ios-mic {
