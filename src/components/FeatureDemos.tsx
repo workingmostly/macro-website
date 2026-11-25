@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { GOALS, SAMPLE_DAY, StatsCard, fmt } from './screens/ios';
+import { SAMPLE_DAY, StatsCard, fmt } from './screens/ios';
 
 /*
   The working controls in the Features section. Each is a small island that hydrates as it scrolls into view, and
@@ -87,67 +87,21 @@ export function Segmented<T extends string>({
 
 /* ── Carbs and fat, worked out for you ──────────────────────── */
 
-// MacroMath.autoCarbs / autoFat. Swift's .rounded() rounds halves up for positive numbers, as Math.round does.
-const autoCarbs = (calories: number, protein: number, split: number) =>
-  Math.round((Math.max(0, calories - 4 * protein) * split) / 100 / 4);
-const autoFat = (calories: number, protein: number, split: number) =>
-  Math.round((Math.max(0, calories - 4 * protein) * (100 - split)) / 100 / 9);
-
 const DAY = SAMPLE_DAY.reduce((t, m) => ({ calories: t.calories + m.calories, protein: t.protein + m.protein }), {
   calories: 0,
   protein: 0,
 });
 
-/**
- * The sample day's stats card, which opens and shuts like the app's, over the split slider from Goals & Tracking.
- * Each meal's carbs and fat are estimated on its own and then added up, as Today does.
- */
+/** The sample day's stats card, which opens and shuts like the app's, to show carbs and fat worked out. */
 export function MacroSplitDemo() {
-  const [split, setSplit] = useState(60);
   const [open, setOpen] = useState(true);
-  const carbs = SAMPLE_DAY.reduce((t, m) => t + autoCarbs(m.calories, m.protein, split), 0);
-  const fat = SAMPLE_DAY.reduce((t, m) => t + autoFat(m.calories, m.protein, split), 0);
-  const carbsGoal = autoCarbs(GOALS.calories, GOALS.protein, split);
-  const fatGoal = autoFat(GOALS.calories, GOALS.protein, split);
 
   return (
     <div className="w-full max-w-[380px]">
       <div className="ios-scope rounded-[24px] shadow-[0_24px_60px_-28px_rgb(0_0_0/0.35)]">
-        <StatsCard
-          calories={DAY.calories}
-          protein={DAY.protein}
-          expanded={open}
-          macros={{ carbs, fat, carbsGoal, fatGoal }}
-          onToggle={() => setOpen((v) => !v)}
-        />
+        <StatsCard calories={DAY.calories} protein={DAY.protein} expanded={open} onToggle={() => setOpen((v) => !v)} />
       </div>
-
-      <div className="ios-scope mt-3 rounded-[20px] bg-white px-4 pt-3.5 pb-2 shadow-[0_10px_30px_-18px_rgb(0_0_0/0.3)]">
-        <div className="flex items-start justify-between" aria-hidden="true">
-          <div>
-            <p className="text-[15px] font-semibold text-ios-orange">Carbs {split}%</p>
-            <p className="mt-0.5 text-[12px] text-muted tabular-nums">{carbsGoal} g</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[15px] font-semibold text-ios-purple">Fat {100 - split}%</p>
-            <p className="mt-0.5 text-[12px] text-muted tabular-nums">{fatGoal} g</p>
-          </div>
-        </div>
-        <input
-          type="range"
-          className="ios-slider mt-1.5"
-          min={10}
-          max={90}
-          step={5}
-          value={split}
-          aria-label="Share of the calories left after protein that goes to carbs"
-          aria-valuetext={`${split}% carbs, ${100 - split}% fat`}
-          style={{ '--f': String((split - 10) / 80), '--tint': 'var(--color-ios-orange)' } as CSSProperties}
-          onChange={(e) => setSplit(Number(e.target.value))}
-        />
-      </div>
-
-      <p className="mt-4 text-center font-mono text-[13px] text-ink/45">kcal = 4 × protein + 4 × carbs + 9 × fat</p>
+      <p className="mt-5 text-center font-mono text-[13px] text-ink/45">kcal = 4 × protein + 4 × carbs + 9 × fat</p>
     </div>
   );
 }
@@ -261,11 +215,6 @@ export function TrackingDemo() {
   const [fibre, setFibre] = useState(false);
   const [emojis, setEmojis] = useState(true);
 
-  // InputView.fields: one step for each thing that's on, or a single tap-to-save screen if nothing is.
-  const steps = [calories && 'Calories', macros && 'Protein', fibre && 'Fibre', emojis && 'Food'].filter(
-    (s): s is string => !!s,
-  );
-
   return (
     <div className="ios-scope w-full max-w-[320px]">
       <div className="divide-y-[0.5px] divide-black/10 overflow-hidden rounded-[14px] bg-white">
@@ -281,18 +230,6 @@ export function TrackingDemo() {
         <Switch label="Macros" detail="(Protein, carbs and fat)" checked={macros} disabled={!calories} onChange={setMacros} />
         <Switch label="Fibre" checked={fibre} onChange={setFibre} />
         <Switch label="Food emojis" checked={emojis} onChange={setEmojis} />
-      </div>
-      <div className="mt-3 flex items-center gap-3 px-1" aria-live="polite">
-        <span className="flex w-16 gap-[3px]" aria-hidden="true">
-          {(steps.length ? steps : ['Save']).map((s) => (
-            <span key={s} className="h-[3px] flex-1 rounded-full bg-ink" />
-          ))}
-        </span>
-        <span className="text-[13px] text-muted">
-          {steps.length
-            ? `${steps.length} ${steps.length === 1 ? 'step' : 'steps'} a meal: ${steps.join(', ').toLowerCase()}`
-            : '1 step a meal: tap to save'}
-        </span>
       </div>
     </div>
   );

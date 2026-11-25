@@ -33,7 +33,7 @@ Voice logging, on iPhones with Apple Intelligence, works as the app's `VoiceHold
 
 `VoiceDemo.tsx` plays the entry screen's mic on a loop in the Features section, with what was said in a bubble beside the phone (the app itself never shows a transcript).
 
-`FeatureDemos.tsx` holds the working controls in the Features section: the carbs and fat split slider and the stats card that opens and shuts, the emoji chips, the goal calculator's Lose / Maintain / Gain, and the tracking switches (turning Calories off takes Macros with it, as in the app). `screens/Summary.tsx` is the Summary tab, with its Calories / Protein switch and the ghost bars for the days left. They're drawn as iOS 26 draws its controls, over real checkboxes, radios and range inputs, so keyboards and screen readers get the native behaviour.
+`FeatureDemos.tsx` holds the working controls in the Features section: the stats card that opens and shuts, the emoji chips, the goal calculator's Lose / Maintain / Gain, and the tracking switches (turning Calories off takes Macros with it, as in the app). `screens/Summary.tsx` is the Summary tab, with its Calories / Protein switch and the ghost bars for the days left. They're drawn as iOS 26 draws its controls, over real checkboxes and radios, so keyboards and screen readers get the native behaviour.
 
 `HowItWorksDemo.tsx` plays the three How it works cards in turn while they're on screen: a drag for calories, a drag for protein, then the meal landing in Today with carbs and fat estimated. Like the comparison, it shows each card finished with reduced motion or no JavaScript.
 
