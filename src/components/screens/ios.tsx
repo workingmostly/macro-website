@@ -1,5 +1,8 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { MicGlyph, Spinner, StopGlyph, VoiceWaveform, type VoicePhase } from './Voice';
+import type { CSSProperties, HTMLAttributes, KeyboardEvent, PointerEvent, ReactNode } from 'react';
+import { DragScale, SCALES } from './scales';
+import { MicGlyph, VoiceBar, type BarMode, type Script, type VoicePhase } from './Voice';
+
+export { DragScale, SCALES };
 
 /* ────────────────────────────────────────────────────────────
    Shared model + maths, mirroring the app's Support/ folder.
@@ -8,10 +11,13 @@ import { MicGlyph, Spinner, StopGlyph, VoiceWaveform, type VoicePhase } from './
 export type MealLabel = 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
 export type Field = 'calories' | 'protein' | 'emoji';
 
+/** A meal on the day list: one entry, or several of the same meal grouped under one row. */
 export interface MealGroup {
   id: string;
   label: MealLabel;
+  /** The first entry's own time, as the row shows it ("8:05 AM"). */
   time: string;
+  /** One per entry. */
   emojis: string[];
   calories: number;
   protein: number;
@@ -27,8 +33,8 @@ export const CARBS_SPLIT = 0.6;
 export const PROTEIN_BLUE = '#007aff';
 export const FILL_MAX: Record<'calories' | 'protein', number> = { calories: 800, protein: 80 };
 
-/** AdherenceTint: a soft green and amber, since system orange is too loud for a status that isn't an error. */
-export const ADHERENCE = { on: 'rgb(117 189 133)', off: 'rgb(235 163 82)' };
+/** AdherenceTint: the same system green and orange as the calories bar and the carbs row. */
+export const ADHERENCE = { on: '#34c759', off: '#ff9500' };
 
 /** Recents first, as FoodEmoji.ordered() puts them, then the app's starter chips. */
 export const EMOJI_PALETTE = ['🍽️', '🍣', '🍗', '🥗', '🍕', '🍔', '🥪', '🍎'];
@@ -60,47 +66,6 @@ export function calorieAccent(calories: number): string {
   return `rgb(${last[0]} ${last[1]} ${last[2]})`;
 }
 
-/** DragScale.swift — piecewise-linear "gearing" from drag distance to value. */
-export class DragScale {
-  constructor(private zones: { span: number; sensitivity: number }[]) {}
-
-  position(value: number): number {
-    let position = 0;
-    let remaining = Math.max(0, value);
-    for (const zone of this.zones) {
-      if (remaining <= zone.span) return position + remaining / zone.sensitivity;
-      position += zone.span / zone.sensitivity;
-      remaining -= zone.span;
-    }
-    return position + remaining / this.zones[this.zones.length - 1].sensitivity;
-  }
-
-  value(position: number): number {
-    let remaining = Math.max(0, position);
-    let value = 0;
-    for (const zone of this.zones) {
-      const span = zone.span / zone.sensitivity;
-      if (remaining <= span) return value + remaining * zone.sensitivity;
-      remaining -= span;
-      value += zone.span;
-    }
-    return value + remaining * this.zones[this.zones.length - 1].sensitivity;
-  }
-}
-
-export const SCALES = {
-  calories: new DragScale([
-    { span: 150, sensitivity: 0.7 },
-    { span: 450, sensitivity: 1.1 },
-    { span: 400, sensitivity: 2.2 },
-    { span: 3000, sensitivity: 4.0 },
-  ]),
-  protein: new DragScale([
-    { span: 80, sensitivity: 0.12 },
-    { span: 80, sensitivity: 0.32 },
-  ]),
-};
-
 export function macroSplit(calories: number, protein: number) {
   const rest = Math.max(0, calories - 4 * protein);
   return {
@@ -121,13 +86,6 @@ export function ChevronDown({ size = 10, weight = 2.2 }: { size?: number; weight
   );
 }
 
-function Pencil() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M3 17l1-4L14 3l3 3L7 16l-4 1z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function Gear() {
   return (
@@ -143,15 +101,6 @@ function Gear() {
   );
 }
 
-function Target() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="6.6" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="8" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="8" cy="8" r="1.1" fill="currentColor" />
-    </svg>
-  );
-}
 
 export function Wand() {
   return (
@@ -255,13 +204,16 @@ interface InputScreenProps {
    * default, as on any current iPhone.
    */
   mic?: boolean;
+  /** Listening or estimating: the mic has opened into its bar, which takes Cancel's place. */
   voice?: VoicePhase;
+  /** What the made-up speaker is saying while the bar listens. */
+  script?: Script;
   onMic?: () => void;
+  /** A tap on the open bar, which finishes listening (the entry screen's mic is tap-to-talk). */
+  onBar?: () => void;
   /** What the voice estimate took the meal to be, shown under the number until a value is changed by hand. */
   estimate?: string | null;
-  /** Eases the fill to its new height, as the app does when an estimate lands, instead of following a drag. */
-  easeFill?: boolean;
-  /** Draws the listening waveform as a still (reduced motion). */
+  /** Draws the bar's waveform as a still (reduced motion). */
   stillWave?: boolean;
   children?: ReactNode;
 }
@@ -279,28 +231,23 @@ export function InputScreen({
   onCancel,
   mic = true,
   voice = 'idle',
+  script,
   onMic,
+  onBar,
   estimate = null,
-  easeFill = false,
   stillWave = false,
   children,
 }: InputScreenProps) {
   const isNumber = field !== 'emoji';
   const accent = field === 'calories' ? calorieAccent(value) : field === 'protein' ? PROTEIN_BLUE : '#8a8a8e';
   const fill = isNumber ? Math.min(1, Math.max(0, value / FILL_MAX[field])) : 0;
-  const listening = voice !== 'idle' && isNumber;
+  const barOpen = voice !== 'idle' && !!script;
   // InputView.showsVoiceButton: only on the first step, so the guess fills everything before anything's confirmed.
-  const showMic = mic && (listening || (stepIndex === 0 && isNumber));
+  const showMic = mic && !barOpen && stepIndex === 0 && isNumber;
 
   return (
     <div className="ios-input" style={{ '--accent': accent } as CSSProperties}>
-      {/* Kept in place through listening, even empty, so an estimate's fill has somewhere to ease up from. */}
-      {(fill > 0 || listening || easeFill) && (
-        <div
-          className={`ios-fill ${easeFill ? 'is-eased' : ''}`}
-          style={{ transform: `translateY(${(1 - fill) * 100}%)` }}
-        />
-      )}
+      {fill > 0 && <div className="ios-fill" style={{ transform: `translateY(${(1 - fill) * 100}%)` }} />}
 
       <div className="ios-segments">
         {Array.from({ length: stepCount }, (_, i) => (
@@ -319,33 +266,21 @@ export function InputScreen({
         </b>
       </div>
 
-      {listening ? (
-        // Takes the number's place while listening and estimating. No transcript, just bars that move with the voice.
-        <div className="ios-readout ios-voice" key="voice">
-          <div className="ios-caption" style={{ color: '#8a8a8e' }}>
-            {voice === 'estimating' ? 'ESTIMATING' : 'LISTENING'}
-          </div>
-          <div className="ios-wave">
-            <VoiceWaveform phase={voice} still={stillWave} />
-          </div>
-          <div className="ios-unit">{voice === 'estimating' ? 'Working it out' : 'Describe what you ate, then tap'}</div>
+      {/* Stays put while listening: the number holds until the estimate arrives, then glides to it. */}
+      <div className="ios-readout" data-field={field}>
+        <div className="ios-caption" style={{ color: accent }}>
+          {field === 'calories' ? 'CALORIES' : field === 'protein' ? 'PROTEIN' : 'FOOD'}
         </div>
-      ) : (
-        <div className="ios-readout" data-field={field} key="number">
-          <div className="ios-caption" style={{ color: accent }}>
-            {field === 'calories' ? 'CALORIES' : field === 'protein' ? 'PROTEIN' : 'FOOD'}
-          </div>
-          {isNumber ? (
-            <>
-              <div className="ios-number">{fmt(value)}</div>
-              <div className="ios-unit">{field === 'calories' ? 'Kcal' : 'Grams'}</div>
-              {estimate && <div className="ios-hint">Estimated · {estimate}</div>}
-            </>
-          ) : (
-            <div className="ios-emoji-big">{emoji}</div>
-          )}
-        </div>
-      )}
+        {isNumber ? (
+          <>
+            <div className="ios-number">{fmt(value)}</div>
+            <div className="ios-unit">{field === 'calories' ? 'Kcal' : 'Grams'}</div>
+            {estimate && <div className="ios-hint">Estimated · {estimate}</div>}
+          </>
+        ) : (
+          <div className="ios-emoji-big">{emoji}</div>
+        )}
+      </div>
 
       {field === 'emoji' && (
         <div className="ios-palette">
@@ -370,31 +305,41 @@ export function InputScreen({
         </div>
       )}
 
-      <div
-        className="ios-cancel"
-        role={onCancel ? 'button' : undefined}
-        tabIndex={onCancel ? 0 : undefined}
-        onPointerDown={onCancel ? (ev) => ev.stopPropagation() : undefined}
-        onClick={onCancel}
-      >
-        Cancel
-      </div>
+      {/* The voice bar opens across Cancel's spot, so Cancel steps aside while it's out. */}
+      {!barOpen && (
+        <div
+          className="ios-cancel"
+          role={onCancel ? 'button' : undefined}
+          tabIndex={onCancel ? 0 : undefined}
+          onPointerDown={onCancel ? (ev) => ev.stopPropagation() : undefined}
+          onClick={onCancel}
+        >
+          Cancel
+        </div>
+      )}
 
       {showMic && (
-        // Floats in the corner so Cancel stays centred: a mic to start, a red stop while listening, a spinner while
-        // the estimate loads.
+        // Where the day list's plus sits, so nothing at the bottom moves as this screen fades in over it.
         <button
           type="button"
-          className="ios-mic"
-          data-phase={voice}
+          className="ios-mic ios-glass"
           tabIndex={onMic ? 0 : -1}
-          disabled={voice === 'estimating'}
-          aria-label={voice === 'idle' ? 'Estimate by voice' : 'Stop and estimate'}
+          aria-label="Estimate by voice"
           onPointerDown={(ev) => ev.stopPropagation()}
           onClick={onMic}
         >
-          {voice === 'idle' ? <MicGlyph /> : voice === 'estimating' ? <Spinner /> : <StopGlyph />}
+          <MicGlyph />
         </button>
+      )}
+
+      {barOpen && script && (
+        <VoiceBar
+          mode={voice === 'estimating' ? 'estimating' : 'listening'}
+          script={script}
+          handsFree
+          stillWave={stillWave}
+          onPress={voice === 'listening' ? onBar : undefined}
+        />
       )}
 
       {children}
@@ -428,23 +373,85 @@ function minutesOf(time: string) {
 }
 
 /**
- * MealTimeline.groups: Breakfast, Lunch and Dinner show when they have food, or when they're still empty and
- * nothing later in the day has been logged, as a ready-made slot at the start of their window. An empty day is
- * just the three slots.
+ * MealTimeline.groups: Breakfast, Lunch and Dinner (the default meal slots) are always on the day, as ready-made
+ * "Add" slots at the start of their window until something's logged in them. Snacks sit between them by time.
  */
 export function withEmptySlots(meals: MealGroup[]): MealGroup[] {
-  const has = (label: MealLabel) => meals.some((m) => m.label === label);
-  const latest = Math.max(-1, ...meals.map((m) => minutesOf(m.time)));
   const slots = (['Breakfast', 'Lunch', 'Dinner'] as const)
-    .filter((label) => {
-      if (has(label)) return false;
-      if (label === 'Breakfast' && (has('Lunch') || has('Dinner'))) return false;
-      if (label === 'Lunch' && has('Dinner')) return false;
-      return latest <= WINDOWS[label][1];
-    })
+    .filter((label) => !meals.some((m) => m.label === label))
     .map((label): MealGroup => ({ id: `slot-${label}`, label, time: '', emojis: [], calories: 0, protein: 0, empty: true }));
   const at = (m: MealGroup) => (m.empty ? WINDOWS[m.label as keyof typeof WINDOWS][0] : minutesOf(m.time));
   return [...meals, ...slots].sort((a, b) => at(a) - at(b));
+}
+
+/**
+ * A group's emojis clustered into the space one emoji takes on an entry row, so group and entry times line up:
+ * two on a diagonal, three in a triangle pointing into the top-left corner, four or more in a 2×2 grid with "+N"
+ * in the last cell past four. As TodayView.emojiGridTile draws it, a little larger than the row's 28pt line.
+ */
+function EmojiTile({ emojis }: { emojis: string[] }) {
+  const tile = 32;
+  const scale = tile / 27;
+  const spots: [number, number][] =
+    emojis.length === 2
+      ? [
+          [0.35, 0.35],
+          [0.65, 0.65],
+        ]
+      : [
+          [0.35, 0.35],
+          [0.7, 0.45],
+          [0.45, 0.7],
+        ];
+  const overflow = emojis.length > 4 ? emojis.length - 3 : 0;
+  const grid = emojis.length >= 4;
+
+  return (
+    <span className="ios-emoji-tile" aria-hidden="true">
+      {grid ? (
+        <span className="grid" style={{ fontSize: 9 * scale }}>
+          {(overflow ? emojis.slice(0, 3) : emojis.slice(0, 4)).map((e, i) => (
+            <span key={i}>{e}</span>
+          ))}
+          {overflow > 0 && <span className="more">+{overflow}</span>}
+        </span>
+      ) : (
+        emojis.slice(0, 3).map((e, i) => (
+          <span
+            key={i}
+            className="spot"
+            style={{
+              left: spots[i][0] * tile,
+              top: spots[i][1] * tile,
+              fontSize: (emojis.length === 2 ? 11.5 : 10) * scale,
+            }}
+          >
+            {e}
+          </span>
+        ))
+      )}
+    </span>
+  );
+}
+
+/** SF Symbols book.fill and chart.bar.fill, for the Log and Summary tabs. */
+function BookGlyph() {
+  return (
+    <svg width="25" height="22" viewBox="0 0 25 22" aria-hidden="true">
+      <path d="M11.6 3.6C9.4 2.1 6.4 1.5 2.9 1.9 2 2 1.4 2.7 1.4 3.6v13.6c0 .9.8 1.6 1.7 1.5 3.2-.4 6 .2 8.5 1.8V3.6z" />
+      <path d="M13.4 3.6c2.2-1.5 5.2-2.1 8.7-1.7.9.1 1.5.8 1.5 1.7v13.6c0 .9-.8 1.6-1.7 1.5-3.2-.4-6 .2-8.5 1.8V3.6z" />
+    </svg>
+  );
+}
+
+function ChartGlyph() {
+  return (
+    <svg width="23" height="22" viewBox="0 0 23 22" aria-hidden="true">
+      <rect x="1.5" y="11" width="5.4" height="9.5" rx="1.6" />
+      <rect x="8.8" y="6" width="5.4" height="14.5" rx="1.6" />
+      <rect x="16.1" y="1.5" width="5.4" height="19" rx="1.6" />
+    </svg>
+  );
 }
 
 function PlusSmall() {
@@ -555,42 +562,62 @@ export function StatsCard({ calories, protein, expanded = false, className = '',
   );
 }
 
+/** The plus held open into its voice bar on Today. */
+export interface PlusBar {
+  mode: BarMode;
+  script: Script;
+  cancel?: 'slide' | 'armed' | null;
+  confirmation?: { emoji?: string; title: string; detail?: string } | null;
+  stillWave?: boolean;
+}
+
 interface TodayScreenProps {
   meals: MealGroup[];
   title?: string;
-  onTrack?: boolean;
   expanded?: boolean;
   newId?: string | null;
+  /** A tap on the plus, or on an empty slot's row. */
   onAdd?: () => void;
+  /** Pointer handlers for the plus, so it can be held to talk. Replace its plain tap when given. */
+  plusHandlers?: Partial<Pick<HTMLAttributes<HTMLDivElement>, 'onPointerDown' | 'onPointerMove' | 'onPointerUp' | 'onPointerCancel'>>;
+  /** The plus being held, before it opens. */
+  pressing?: boolean;
+  bar?: PlusBar | null;
 }
 
-export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded = false, newId, onAdd }: TodayScreenProps) {
+export function TodayScreen({
+  meals,
+  title = 'Today',
+  expanded = false,
+  newId,
+  onAdd,
+  plusHandlers,
+  pressing = false,
+  bar = null,
+}: TodayScreenProps) {
   const t = totals(meals);
-  // An empty slot's row adds a meal, like the + button.
+  const keys = (ev: KeyboardEvent<HTMLDivElement>) => {
+    if (onAdd && (ev.key === 'Enter' || ev.key === ' ')) {
+      ev.preventDefault();
+      onAdd();
+    }
+  };
+  // An empty slot's row adds a meal into that slot, like the plus.
   const press = onAdd
     ? {
         role: 'button' as const,
         tabIndex: 0,
-        onPointerDown: (ev: { stopPropagation: () => void }) => ev.stopPropagation(),
+        onPointerDown: (ev: PointerEvent<HTMLDivElement>) => ev.stopPropagation(),
         onClick: onAdd,
-        onKeyDown: (ev: { key: string; preventDefault: () => void }) => {
-          if (ev.key === 'Enter' || ev.key === ' ') {
-            ev.preventDefault();
-            onAdd();
-          }
-        },
+        onKeyDown: keys,
       }
     : {};
 
   return (
     <div className="ios-today">
+      {/* How the week is going lives on the Summary tab now, so the title row is just the title and the cog. */}
       <div className="ios-today-header">
         <div className="ios-large-title">{title}</div>
-        {onTrack && (
-          <span className="ios-badge" style={{ color: ADHERENCE.on, background: 'rgb(117 189 133 / 0.16)' }}>
-            On track <Target />
-          </span>
-        )}
         <span className="ios-glass-btn">
           <Gear />
         </span>
@@ -602,9 +629,9 @@ export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded =
         <div className="ios-meals">
           {withEmptySlots(meals).map((m, i) => (
             <div key={m.id}>
+              {/* Just the meal's name: every entry shows its own time on its row. */}
               <div className="ios-meal-head">
-                {/* An empty slot's header is just its name; there's no time until something's in it. */}
-                <span>{m.empty ? m.label : `${m.label} - ${m.time}`}</span>
+                <span>{m.label === 'Snack' && m.emojis.length > 1 ? 'Snacks' : m.label}</span>
                 <span>{i === 0 ? 'Cals' : ''}</span>
                 <span>{i === 0 ? 'Protein' : ''}</span>
                 <span />
@@ -620,14 +647,14 @@ export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded =
                 </div>
               ) : (
                 <div className={`ios-meal-row ${m.id === newId ? 'is-new' : ''}`} key={`${m.id}-${m.emojis.length}`}>
-                  <span className="emojis">
-                    {m.emojis.map((e, j) => (
-                      <span key={j}>{e}</span>
-                    ))}
+                  <span className="lead">
+                    {m.emojis.length > 1 ? <EmojiTile emojis={m.emojis} /> : <span className="emoji">{m.emojis[0]}</span>}
+                    <span className="time">{m.time}</span>
                   </span>
-                  <span className="cals">{fmt(m.calories)}</span>
+                  <span className="cals">{m.calories}</span>
                   <span className="protein">{m.protein}g</span>
-                  <span className="ios-chevron">{m.emojis.length > 1 ? <ChevronDown size={14} weight={2} /> : <Pencil />}</span>
+                  {/* A group opens to its entries; a single entry's row opens the editor, so it has no icon. */}
+                  <span className="ios-chevron">{m.emojis.length > 1 && <ChevronDown size={14} weight={2} />}</span>
                 </div>
               )}
             </div>
@@ -635,23 +662,42 @@ export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded =
         </div>
       </div>
 
+      {/* One bar along the bottom: Log and Summary on the left, the plus on the right, on the same line. The tabs
+          give way when the plus opens into its voice bar. */}
+      <div className="ios-tabbar ios-glass" data-hidden={!!bar} aria-hidden="true">
+        <span data-on="true">
+          <BookGlyph />
+          Log
+        </span>
+        <span>
+          <ChartGlyph />
+          Summary
+        </span>
+      </div>
+
+      {bar && (
+        <VoiceBar
+          mode={bar.mode}
+          script={bar.script}
+          cancel={bar.cancel}
+          confirmation={bar.confirmation}
+          stillWave={bar.stillWave}
+        />
+      )}
+
+      {/* Stays mounted under the open bar, so a finger holding it keeps hold of it. */}
       <div
         className="ios-fab"
+        data-hidden={!!bar}
+        data-pressing={pressing}
         role={onAdd ? 'button' : undefined}
-        aria-label={onAdd ? 'Add a meal' : undefined}
+        aria-label={onAdd ? 'Add meal. Hold to log a meal by voice' : undefined}
         tabIndex={onAdd ? 0 : undefined}
-        onPointerDown={onAdd ? (ev) => ev.stopPropagation() : undefined}
-        onClick={onAdd}
-        onKeyDown={
-          onAdd
-            ? (ev) => {
-                if (ev.key === 'Enter' || ev.key === ' ') {
-                  ev.preventDefault();
-                  onAdd();
-                }
-              }
-            : undefined
-        }
+        onKeyDown={onAdd ? keys : undefined}
+        {...(plusHandlers ?? {
+          onPointerDown: onAdd ? (ev: PointerEvent<HTMLDivElement>) => ev.stopPropagation() : undefined,
+          onClick: onAdd,
+        })}
       >
         <Plus />
       </div>
@@ -664,8 +710,8 @@ export function TodayScreen({ meals, title = 'Today', onTrack = true, expanded =
    ──────────────────────────────────────────────────────────── */
 
 export const SAMPLE_DAY: MealGroup[] = [
-  { id: 'b', label: 'Breakfast', time: '8 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
-  { id: 'l', label: 'Lunch', time: '1 PM', emojis: ['🥪', '🍎'], calories: 620, protein: 41 },
-  { id: 's', label: 'Snack', time: '4 PM', emojis: ['🍫'], calories: 210, protein: 20 },
-  { id: 'd', label: 'Dinner', time: '7 PM', emojis: ['🍗', '🍟'], calories: 780, protein: 58 },
+  { id: 'b', label: 'Breakfast', time: '8:05 AM', emojis: ['🥣', '☕'], calories: 410, protein: 32 },
+  { id: 'l', label: 'Lunch', time: '1:10 PM', emojis: ['🥪', '🍎'], calories: 620, protein: 41 },
+  { id: 's', label: 'Snack', time: '4:20 PM', emojis: ['🍫'], calories: 210, protein: 20 },
+  { id: 'd', label: 'Dinner', time: '7:15 PM', emojis: ['🍗', '🍟'], calories: 780, protein: 58 },
 ];

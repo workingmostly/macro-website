@@ -1,26 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { InputScreen, Phone } from './screens/ios';
-import { GUESS, SAID, SAID_LENGTH, SAID_WORDS, type VoicePhase } from './screens/Voice';
+import { BURRITO, glide, type VoicePhase } from './screens/Voice';
 
 /*
-  The voice estimate, played on a loop while it's on screen: a tap on the mic, a sentence (shown in a bubble, since
-  the app itself never shows what it heard), a tap to stop, the estimate, then a tap on to protein, filled in too.
-  Server-rendered as a still of the result, which is also what reduced motion gets.
+  The entry screen's mic, played on a loop while it's on screen: a tap on the mic opens the voice bar, a sentence
+  (shown in a bubble beside the phone, since the app never shows what it heard), a tap on the bar to stop, then the
+  number glides to the estimate, and a tap on to protein, filled in too. Server-rendered as a still of the result,
+  which is also what reduced motion gets.
 */
 
-// Where the mic sits, in screen points: 20 in from the right, 46 up from the bottom, 48 across.
-const MIC = { x: 393 - 20 - 24, y: 852 - 46 - 24 };
+// Where the mic sits, in screen points: FloatingButtonMetrics, the same spot as the day list's plus.
+const MIC = { x: 393 - 20 - 29, y: 852 - 54 - 29 };
 const TAP = { x: 250, y: 560 };
 
 // Timeline, in ms.
-const LISTEN_AT = 800;
-const STOP_AT = LISTEN_AT + SAID_LENGTH * 1000 + 450;
+const LISTEN_AT = 760;
+const STOP_AT = LISTEN_AT + BURRITO.length * 1000 + 450;
 const LANDS_AT = STOP_AT + 1350;
 const CONFIRM_AT = LANDS_AT + 2100;
 const LOOP = CONFIRM_AT + 2700;
 /** The still: the estimate just landed, with what was said still up. */
-const STILL = LANDS_AT + 600;
+const STILL = LANDS_AT + 900;
 
+const calorieGlide = glide('calories', 0, BURRITO.guess.calories);
 const within = (t: number, a: number, b: number) => t >= a && t < b;
 
 function frameAt(t: number, still: boolean) {
@@ -29,10 +31,10 @@ function frameAt(t: number, still: boolean) {
   const onProtein = t >= CONFIRM_AT + 120;
   const heard = (t - LISTEN_AT) / 1000;
 
-  // Three touches: the mic, the stop button, then the screen to confirm. Each fades out where it was.
-  const at = t < CONFIRM_AT - 520 ? MIC : TAP;
+  // Three touches: the mic, the bar's stop square in the same spot, then the screen to confirm. Each fades out
+  // where it was.
   const ghost = {
-    ...at,
+    ...(t < CONFIRM_AT - 520 ? MIC : TAP),
     shown: within(t, 250, LISTEN_AT) || within(t, STOP_AT - 520, STOP_AT + 160) || within(t, CONFIRM_AT - 520, CONFIRM_AT + 360),
     pressed: within(t, 600, 740) || within(t, STOP_AT - 150, STOP_AT) || within(t, CONFIRM_AT - 140, CONFIRM_AT),
   };
@@ -40,11 +42,10 @@ function frameAt(t: number, still: boolean) {
   return {
     voice,
     field: onProtein ? ('protein' as const) : ('calories' as const),
-    value: onProtein ? GUESS.protein : landed ? GUESS.calories : 0,
-    estimate: landed ? GUESS.name : null,
-    easeFill: within(t, LANDS_AT, LANDS_AT + 450),
+    value: onProtein ? BURRITO.guess.protein : landed ? calorieGlide.at((t - LANDS_AT) / 1000) : 0,
+    estimate: landed ? BURRITO.guess.name : null,
     ghost,
-    bubble: still || within(t, LISTEN_AT + SAID_WORDS[0].at * 1000, STOP_AT + 120),
+    bubble: still || within(t, LISTEN_AT + BURRITO.words[0].at * 1000, STOP_AT + 120),
     heard: (at: number) => still || heard >= at,
   };
 }
@@ -88,7 +89,7 @@ export default function VoiceDemo() {
   return (
     <div ref={rootRef} className="relative flex w-full max-w-[440px] justify-end sm:justify-center">
       <p className="sr-only">
-        {`Someone taps the mic and says “${SAID}”. Macro listens, works it out, and fills in ${GUESS.calories} calories and ${GUESS.protein} grams of protein, marked “Estimated · ${GUESS.name}”.`}
+        {`Someone taps the mic and says “${BURRITO.said}”. Macro listens, works it out, and fills in ${BURRITO.guess.calories} calories and ${BURRITO.guess.protein} grams of protein, marked “Estimated · ${BURRITO.guess.name}”.`}
       </p>
 
       <div
@@ -98,11 +99,11 @@ export default function VoiceDemo() {
       >
         {/* Unheard words keep their space, so the bubble never changes size. The quotes ride on the first and
             last words, so a closing one never hangs on its own. */}
-        {SAID_WORDS.map((w, i) => (
-          <span key={w.text} className="said-word" data-heard={f.heard(w.at)}>
+        {BURRITO.words.map((w, i) => (
+          <span key={`${w.text}-${i}`} className="said-word" data-heard={f.heard(w.at)}>
             {i === 0 && '“'}
             {w.text}
-            {i < SAID_WORDS.length - 1 ? ' ' : '”'}
+            {i < BURRITO.words.length - 1 ? ' ' : '”'}
           </span>
         ))}
       </div>
@@ -115,8 +116,8 @@ export default function VoiceDemo() {
           label="Lunch"
           time="12:41"
           voice={f.voice}
+          script={BURRITO}
           estimate={f.estimate}
-          easeFill={f.easeFill}
         >
           {animate && (
             <div

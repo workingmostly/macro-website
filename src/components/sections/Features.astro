@@ -2,7 +2,7 @@
 import FeatureCard from './FeatureCard.astro';
 import VoiceDemo from '../VoiceDemo';
 import { EmojiDemo, GoalsDemo, MacroSplitDemo, TrackingDemo } from '../FeatureDemos';
-import { AdherenceCard } from '../screens/Adherence';
+import { SummaryCard } from '../screens/Summary';
 ---
 
 <!-- The toggles, segmented controls, slider, emoji chips and stats card in these cards all work. Each is a React
@@ -19,9 +19,10 @@ import { AdherenceCard } from '../screens/Adherence';
   <div class="mt-14 grid gap-3 sm:mt-20 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
     <FeatureCard
       full
+      id="voice"
       badge="New"
       title="Or just say what you ate."
-      body="Tap the mic and describe your meal in your own words. Macro fills in the calories and protein, picks an emoji, and leaves every number ready to nudge before you save. It all happens on your iPhone, with Apple Intelligence, and what you say is never stored."
+      body="Hold the plus, describe your meal in your own words, and let go. Macro works out the calories and protein, picks an emoji and logs it, without opening a thing. Want to check first? Tap the mic on the calories screen and the numbers fill in, ready to nudge. It all happens on your iPhone, with Apple Intelligence, and what you say is never stored."
       note="On iPhones with Apple Intelligence, running iOS 26."
     >
       <VoiceDemo client:visible={{ rootMargin: '200px' }} />
@@ -86,10 +87,10 @@ import { AdherenceCard } from '../screens/Adherence';
 
     <FeatureCard
       wide
-      title="On track, at a glance."
-      body="Macro looks at your week and gives you a straight answer. A day counts when calories land within 10% of your goal, over or under, and protein gets close or goes over. Tap the badge to see why, and how each day did."
+      title="Your week, at a glance."
+      body="The Summary tab gives you a straight answer: how many days landed both goals, what you've averaged, and what the days left would need for the week to even out. A day counts when calories land within 10% of your goal, over or under, and protein gets close or goes over."
     >
-      <AdherenceCard client:visible className="w-full max-w-[380px]" />
+      <SummaryCard client:visible />
     </FeatureCard>
 
     <FeatureCard
