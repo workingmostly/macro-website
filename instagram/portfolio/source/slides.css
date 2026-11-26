@@ -1,0 +1,680 @@
+/* The website's own styles: the phones, screens, voice bar and fonts, exactly as the site draws them. */
+@import '../../../src/styles/global.css';
+@source '../../../src/components';
+@source '.';
+
+/*
+  Slides are 1080 × 1440 (3:4). Type is sized for a phone feed, where the slide shows about 390pt wide: 34px here is
+  about 12pt there, so nothing that has to be read goes below that.
+*/
+:root {
+  --ink: #0a0a0a;
+  --muted: #6e6e73;
+  --faint: #a1a1a6;
+  --surface: #f2f2f7;
+  --line: #d9d9de;
+  --night: #0b0b0c;
+  --green: #34c759;
+  --blue: #007aff;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display: 'Inter Tight Variable', 'Inter Variable', sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  background: #000;
+}
+
+.stage {
+  position: relative;
+  width: 1080px;
+  height: 1440px;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: 'Inter Variable', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+/* Every frame is computed from t, so nothing on the stage may animate on its own. */
+.stage *,
+.stage *::before,
+.stage *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.emoji-img {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.22em;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+
+.hdr {
+  position: absolute;
+  z-index: 20;
+  top: 64px;
+  left: 76px;
+  right: 76px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.hdr b {
+  color: var(--ink);
+  font-weight: 700;
+}
+.hdr i {
+  font-style: normal;
+  margin: 0 14px;
+  color: var(--faint);
+}
+.hdr[data-dark='true'] {
+  color: rgb(255 255 255 / 0.55);
+}
+.hdr[data-dark='true'] b {
+  color: #fff;
+}
+.hdr[data-dark='true'] i {
+  color: rgb(255 255 255 / 0.3);
+}
+
+/* ── Type ───────────────────────────────────────────────────── */
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 84px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.sub {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.38;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.sub b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.mono {
+  font-family: var(--mono);
+}
+/* The app's own caption style (13pt semibold, wide tracking), scaled up for the slides. */
+.caption {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── Annotations ────────────────────────────────────────────── */
+
+.note {
+  position: absolute;
+  font-size: 30px;
+  line-height: 1.32;
+  color: var(--ink);
+}
+.note .k {
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.lead-line {
+  position: absolute;
+  height: 0;
+  border-top: 2px solid var(--ink);
+}
+.lead-line::before,
+.lead-line::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.lead-line::before {
+  left: -5px;
+}
+.lead-line::after {
+  right: -5px;
+  background: transparent;
+}
+
+/* ── Cards beside the phones ────────────────────────────────── */
+
+.card {
+  position: absolute;
+  padding: 26px 30px 30px;
+  border-radius: 34px;
+  background: #fff;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.04),
+    0 24px 60px -28px rgb(0 0 0 / 0.28);
+}
+.card .k {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.card .k i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.card .said {
+  font-size: 40px;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+}
+.card .guess {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.card .nums {
+  margin-top: 10px;
+  font-size: 34px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.card .nums b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── Slide frame ────────────────────────────────────────────── */
+
+.slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.bg-light {
+  background: var(--surface);
+}
+.bg-white {
+  background: #fff;
+}
+.bg-night {
+  background: var(--night);
+  color: #fff;
+}
+.top {
+  position: absolute;
+  z-index: 5;
+  top: 138px;
+  left: 76px;
+  right: 76px;
+  display: grid;
+  gap: 22px;
+}
+.phone-at {
+  position: absolute;
+  z-index: 3;
+}
+/* A soft pool of the screen's colour behind a phone. */
+.glow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  width: 980px;
+  height: 980px;
+  margin: -490px 0 0 -490px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 34%, transparent), transparent);
+}
+
+/* ── Phones ─────────────────────────────────────────────────── */
+
+/* The entry screen as a sheet over the day, so saving can drop it away. */
+.sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+}
+/* The row the save adds, coming in as it does on the site (ios-row-in), driven by t. */
+.row-in .ios-meal-row.is-new {
+  opacity: var(--row-o, 1);
+  transform: translateY(var(--row-y, 0)) scale(var(--row-s, 1));
+}
+/* The emoji palette is drawn by the slide (with Apple emoji), so the screen's own one steps aside. */
+.own-palette .ios-input > .ios-palette:not(.mine) {
+  display: none;
+}
+
+/* ── Cover ──────────────────────────────────────────────────── */
+
+.cover-glow {
+  position: absolute;
+  top: 120px;
+  left: -40px;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side at 38% 50%, rgb(52 199 89 / 0.32), transparent),
+    radial-gradient(closest-side at 64% 54%, rgb(0 122 255 / 0.3), transparent);
+  filter: blur(10px);
+}
+.cover-icon {
+  position: absolute;
+  top: 206px;
+  left: 76px;
+  width: 176px;
+  height: 176px;
+  filter: drop-shadow(0 30px 40px rgb(0 0 0 / 0.5));
+}
+.cover-name {
+  position: absolute;
+  top: 418px;
+  left: 70px;
+  margin: 0;
+  font-family: var(--display);
+  font-size: 176px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.cover-line {
+  position: absolute;
+  top: 640px;
+  left: 76px;
+  width: 470px;
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  color: rgb(255 255 255 / 0.74);
+  text-wrap: balance;
+}
+.cover-credit {
+  position: absolute;
+  bottom: 76px;
+  left: 76px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 24px;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 0.5);
+}
+
+/* ── 02 Why ─────────────────────────────────────────────────── */
+
+.steps {
+  position: absolute;
+  display: grid;
+  gap: 8px;
+}
+.steps-head {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 52px;
+  padding: 0 20px;
+  border-radius: 14px;
+  background: rgb(0 0 0 / 0.045);
+  font-size: 26px;
+  color: #48484a;
+  white-space: nowrap;
+}
+.step .mono {
+  font-size: 21px;
+  color: var(--faint);
+}
+.step[data-tone='green'],
+.step[data-tone='blue'] {
+  height: 72px;
+  border-radius: 20px;
+  font-size: 32px;
+  font-weight: 600;
+  color: #fff;
+}
+.step[data-tone='green'] {
+  background: var(--green);
+}
+.step[data-tone='blue'] {
+  background: var(--blue);
+}
+.step[data-tone] .mono {
+  color: rgb(255 255 255 / 0.7);
+  font-size: 24px;
+}
+.steps-rest {
+  margin: 14px 0 0;
+  font-size: 30px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.purpose-body {
+  margin: 330px 0 0;
+  font-size: 34px;
+  line-height: 1.36;
+  color: var(--muted);
+}
+.purpose-body b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── 04 The drag ────────────────────────────────────────────── */
+
+.ruler {
+  position: absolute;
+  inset: 0;
+}
+.ruler-spine {
+  position: absolute;
+  left: 228px;
+  width: 3px;
+  border-radius: 2px;
+  background: #e5e5ea;
+}
+.tick {
+  position: absolute;
+  left: 230px;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+}
+.tick-label {
+  position: absolute;
+  right: calc(1080px - 206px);
+  margin-top: -15px;
+  font-size: 24px;
+  line-height: 30px;
+  color: var(--muted);
+}
+.zone {
+  position: absolute;
+  left: 330px;
+  right: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 30px;
+  border-left: 3px solid var(--ink);
+}
+.zone::before,
+.zone::after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  width: 16px;
+  border-top: 3px solid var(--ink);
+}
+.zone::before {
+  top: 0;
+}
+.zone::after {
+  bottom: 0;
+}
+.zone-rate {
+  font-size: 38px;
+  font-family: var(--display);
+  letter-spacing: -0.02em;
+}
+.zone-rate b {
+  font-weight: 600;
+}
+.zone-what {
+  font-size: 28px;
+  color: var(--muted);
+}
+.gear-foot {
+  position: absolute;
+  left: 676px;
+  right: 76px;
+  top: 500px;
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.38;
+  color: var(--muted);
+}
+.gear-foot .mono {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 22px;
+  color: var(--ink);
+}
+
+/* ── 05 Colour ──────────────────────────────────────────────── */
+
+.ramp {
+  position: absolute;
+  height: 80px;
+}
+.ramp-bar {
+  height: 18px;
+  border-radius: 9px;
+}
+.ramp-stop {
+  position: absolute;
+  top: 34px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  font-size: 22px;
+  color: var(--muted);
+}
+.ramp-stop:first-of-type {
+  transform: none;
+}
+.ramp-pin {
+  position: absolute;
+  top: -9px;
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.18);
+}
+.protein-row {
+  position: absolute;
+  left: 76px;
+  right: 76px;
+  top: 1236px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.protein-row p {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.36;
+  color: var(--muted);
+}
+.protein-row b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.protein-swatch {
+  flex: none;
+  width: 92px;
+  height: 92px;
+  border-radius: 24px;
+  /* A tiny protein screen: white, then the 2px edge and the 14% fill. */
+  background: linear-gradient(180deg, #fff 44%, var(--blue) 44%, var(--blue) calc(44% + 2px), color-mix(in srgb, var(--blue) 14%, #fff) calc(44% + 2px));
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 8px 20px -10px rgb(0 0 0 / 0.25);
+}
+
+/* ── 06 Details ─────────────────────────────────────────────── */
+
+.leader {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.detail-note {
+  z-index: 7;
+  font-size: 28px;
+  line-height: 1.32;
+}
+
+/* ── 07 Voice ───────────────────────────────────────────────── */
+
+.flow {
+  position: absolute;
+}
+/* The tab bar and plus give way as the plus opens into its bar. */
+.voice-phone .ios-tabbar,
+.voice-phone .ios-fab {
+  opacity: var(--chrome-o, 1);
+}
+
+/* ── 08 Days ────────────────────────────────────────────────── */
+
+.day-page {
+  position: absolute;
+  inset: 0;
+}
+.day-page .ios-large-title {
+  opacity: var(--title-o, 1);
+}
+.day-page .ios-glass-btn,
+.day-page .ios-tabbar,
+.day-page .ios-fab {
+  visibility: hidden;
+}
+.day-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+.day-chrome .ios-today {
+  background: transparent;
+}
+.day-chrome .ios-today-body,
+.day-chrome .ios-large-title {
+  visibility: hidden;
+}
+
+/* ── 09 Close ───────────────────────────────────────────────── */
+
+.close-glow {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  width: 640px;
+  height: 640px;
+  margin-left: -320px;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side at 40% 50%, rgb(52 199 89 / 0.34), transparent),
+    radial-gradient(closest-side at 60% 52%, rgb(0 122 255 / 0.32), transparent);
+  filter: blur(8px);
+}
+.close-icon {
+  position: absolute;
+  top: 196px;
+  left: 50%;
+  width: 236px;
+  height: 236px;
+  margin-left: -118px;
+  filter: drop-shadow(0 34px 44px rgb(0 0 0 / 0.55));
+}
+.close-name {
+  position: absolute;
+  top: 470px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-family: var(--display);
+  font-size: 124px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+.close-pill {
+  position: absolute;
+  top: 638px;
+  left: 50%;
+  margin: 0;
+  padding: 0 40px;
+  height: 92px;
+  line-height: 92px;
+  border-radius: 46px;
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 38px;
+  font-weight: 600;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.close-url {
+  position: absolute;
+  top: 780px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 46px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.85);
+  letter-spacing: 0.01em;
+}
+
+/* The entry screen's back zone: a tap in the left third goes back a step. */
+.left-third {
+  position: absolute;
+  z-index: 2;
+  top: 112px;
+  bottom: 120px;
+  left: 0;
+  width: 33.3%;
+  background: rgb(0 0 0 / 0.04);
+  border-right: 2px dashed rgb(0 0 0 / 0.22);
+}
+
+/* Two states of a screen, cross-dissolving. */
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* The cover's still: a fading streak below the finger, so it reads as a swipe up. */
+.swipe-trail {
+  position: absolute;
+  z-index: 49;
+  width: 56px;
+  height: 240px;
+  margin-left: -28px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.12), rgb(0 0 0 / 0));
+  pointer-events: none;
+}
